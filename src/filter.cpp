@@ -76,4 +76,55 @@ public:
 		}
 		return result;
 	}
+	Mat ITU_R() {
+		Mat result = img.clone();
+		for (int i = 0; i < result.rows; i++) {
+			for (int j = 0; j < result.cols; j++) {
+				int intense = (result.at<Vec3b>(i, j)[0] * 0.2126 + result.at<Vec3b>(i, j)[1] * 0.7152 + result.at<Vec3b>(i, j)[2] * 0.0722);
+				result.at<Vec3b>(i, j)[0] = intense;
+				result.at<Vec3b>(i, j)[1] = intense;
+				result.at<Vec3b>(i, j)[2] = intense;
+			}
+		}
+		return result;
+	}
+
+	Mat Max() {
+		Mat result = img.clone();
+		for (int i = 0; i < result.rows; i++) {
+			for (int j = 0; j < result.cols; j++) {
+				int intense = (Find_Max(result.at<Vec3b>(i,j)[0], result.at<Vec3b>(i, j)[1], result.at<Vec3b>(i, j)[2]));
+				result.at<Vec3b>(i, j)[0] = intense;
+				result.at<Vec3b>(i, j)[1] = intense;
+				result.at<Vec3b>(i, j)[2] = intense;
+			}
+		}
+		return result;
+	}
+
+	Mat Min() {
+		Mat result = img.clone();
+		for (int i = 0; i < result.rows; i++) {
+			for (int j = 0; j < result.cols; j++) {
+				int intense = (Find_Min(result.at<Vec3b>(i, j)[0], result.at<Vec3b>(i, j)[1], result.at<Vec3b>(i, j)[2]));
+				result.at<Vec3b>(i, j)[0] = intense;
+				result.at<Vec3b>(i, j)[1] = intense;
+				result.at<Vec3b>(i, j)[2] = intense;
+			}
+		}
+		return result;
+	}
+
+	Mat NoName() {
+		Mat result = img.clone();
+		for (int i = 0; i < result.rows; i++) {
+			for (int j = 0; j < result.cols; j++) {
+				int intense = (result.at<Vec3b>(i, j)[0] * 0.2952 + result.at<Vec3b>(i, j)[1] * 0.5547 + result.at<Vec3b>(i, j)[2] * 0.148);
+				result.at<Vec3b>(i, j)[0] = intense;
+				result.at<Vec3b>(i, j)[1] = intense;
+				result.at<Vec3b>(i, j)[2] = intense;
+			}
+		}
+		return result;
+	}
 };
