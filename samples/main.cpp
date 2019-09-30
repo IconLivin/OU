@@ -7,28 +7,30 @@ const char* cmdOptions =
 void main(int argc,char** argv) {
 	
 	CommandLineParser parser(argc, argv, cmdOptions);
-	string path_to_image(parser.get<String>("image"));
-	Mat image = imread(path_to_image);
+	//string path_to_image(parser.get<String>("C:\\Users\\aaron\\OneDrive\\Рабочий стол\\OU-build\\samples\\lobachevsky.jpg"));
+	Mat image = imread("C:\\Users\\aaron\\OneDrive\\Рабочий стол\\OU-build\\samples\\lobachevsky.jpg");
 	Filter fil(image);
 	Mat new_image = image.clone();
-	Mat g_f = fil.AverageFilter();
-	Mat l_f = fil.LightnessFilter();
-	Mat lum_f = fil.LuminosityFilter();
-	Mat p_f = fil.PhotoshopFilter();
-	Mat itu_r = fil.ITU_R();
-	Mat  noname = fil.NoName();
-	Mat max = fil.Max();
-	Mat min = fil.Min();
-	cvtColor(image, new_image, COLOR_RGB2GRAY);
-	imshow("Gray Filter", new_image);
-	imshow("Average Filter", g_f);
-	imshow("Lightness Filter", l_f);
-	imshow("Luminosity Filter", lum_f);
-	imshow("Photoshop Filter", p_f);
-	imshow("ITU-R", itu_r);
-	imshow("Max", max);
-	imshow("Min", min);
-	imshow("NoName", noname);
+	Mat avg = fil.AverageFilter();
+	cvtColor(image, new_image, COLOR_BGR2GRAY);
+
+	/*imshow("Gray Filter", new_image);
+	imshow("Average Filter", avg);
+	imshow("Lightness Filter", fil.LightnessFilter());
+	imshow("Luminosity Filter", fil.LuminosityFilter());
+	imshow("Photoshop Filter", fil.PhotoshopFilter());
+	imshow("ITU-R", fil.ITU_R());
+	imshow("Max", fil.Max());
+	imshow("Min", fil.Min());
+	imshow("NoName", fil.NoName());*/
+	for (int i = 0; i < 5; i++) {
+		for (int j = 0; j < 5; j++) {
+			cout << (int)avg.at<Vec3b>(i, j)[0] << " ";
+		}
+		cout << "          ";
+		for (int j = 0; j < 5; j++)cout << (int)new_image.at<uchar>(i, j) << " ";
+		cout << endl;
+	}
 	waitKey(0);
 }
 

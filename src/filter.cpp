@@ -6,6 +6,11 @@
 using namespace std;
 using namespace cv;
 
+int Clamp(int a, int b) {
+	if (a - b < 0)return 0;
+	return a - b;
+}
+
 int Find_Max(int a, int b, int c) {
 	if (a > b) {
 		if (a > c)return a;
@@ -23,19 +28,31 @@ int Find_Min(int a, int b, int c) {
 	else if (b < c)return b;
 	else return c;
 }
+int Check_Diff(Mat or, Mat check) {
+	int res = 0;
+	for (int i = 0; i < check.rows; i++) {
+		for (int j = 0; j < check.cols; j++) {
+			res += (int) or .at<uchar>(i, j) - (int)check.at<Vec3b>(i, j)[0];
+		}
+	}
+	return res;;
+}
+
+
+
 
 class Filter {
 	Mat img;
 public:
 	Filter(Mat img1) { img = img1; }
 	Mat AverageFilter() {
-		Mat result=img.clone();
+		Mat result = img.clone();
 		for (int i = 0; i < result.rows; i++) {
 			for (int j = 0; j < result.cols; j++) {
-				int intense = (result.at<Vec3b>(i,j)[0] + result.at<Vec3b>(i,j)[1] + result.at<Vec3b>(i,j)[2]) / 3;
-				result.at<Vec3b>(i,j)[0] = intense;
-				result.at<Vec3b>(i,j)[1] = intense;
-				result.at<Vec3b>(i,j)[2] = intense;
+				int intense = (result.at<Vec3b>(i, j)[0] + result.at<Vec3b>(i, j)[1] + result.at<Vec3b>(i, j)[2]) / 3;
+				result.at<Vec3b>(i, j)[0] = intense;
+				result.at<Vec3b>(i, j)[1] = intense;
+				result.at<Vec3b>(i, j)[2] = intense;
 			}
 		}
 		return result;
@@ -93,7 +110,7 @@ public:
 		Mat result = img.clone();
 		for (int i = 0; i < result.rows; i++) {
 			for (int j = 0; j < result.cols; j++) {
-				int intense = (Find_Max(result.at<Vec3b>(i,j)[0], result.at<Vec3b>(i, j)[1], result.at<Vec3b>(i, j)[2]));
+				int intense = (Find_Max(result.at<Vec3b>(i, j)[0], result.at<Vec3b>(i, j)[1], result.at<Vec3b>(i, j)[2]));
 				result.at<Vec3b>(i, j)[0] = intense;
 				result.at<Vec3b>(i, j)[1] = intense;
 				result.at<Vec3b>(i, j)[2] = intense;
@@ -127,4 +144,5 @@ public:
 		}
 		return result;
 	}
+
 };
