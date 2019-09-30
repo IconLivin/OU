@@ -1,37 +1,68 @@
 #include "filter.cpp"
+#include <fstream>
+#include <conio.h>
 const char* cmdOptions =
 "{ i  image         | <none> | image to process        }"
 "{ q ? help usage   | <none> | print help message      }";
 
 
-void main(int argc,char** argv) {
+int main(int argc,char** argv) {
 	
 	CommandLineParser parser(argc, argv, cmdOptions);
-	//string path_to_image(parser.get<String>("C:\\Users\\aaron\\OneDrive\\Рабочий стол\\OU-build\\samples\\lobachevsky.jpg"));
-	Mat image = imread("C:\\Users\\aaron\\OneDrive\\Рабочий стол\\OU-build\\samples\\lobachevsky.jpg");
+	string path_to_image(parser.get<String>( "image"));
+	Mat image = imread(path_to_image);
+	if (image.empty()) {
+		cout << "Failed load image" << endl;
+		return -1;
+	}
 	Filter fil(image);
 	Mat new_image = image.clone();
-	Mat avg = fil.AverageFilter();
 	cvtColor(image, new_image, COLOR_BGR2GRAY);
-
-	/*imshow("Gray Filter", new_image);
-	imshow("Average Filter", avg);
-	imshow("Lightness Filter", fil.LightnessFilter());
-	imshow("Luminosity Filter", fil.LuminosityFilter());
-	imshow("Photoshop Filter", fil.PhotoshopFilter());
-	imshow("ITU-R", fil.ITU_R());
-	imshow("Max", fil.Max());
-	imshow("Min", fil.Min());
-	imshow("NoName", fil.NoName());*/
-	for (int i = 0; i < 5; i++) {
-		for (int j = 0; j < 5; j++) {
-			cout << (int)avg.at<Vec3b>(i, j)[0] << " ";
+	int curr = 1;
+	string nf[9] = { "Opencv grey", "Average", "Lightness", "Luminosity", "Photoshop","ITU_R", "Max", "Min", "Noname" };//namef filter
+	Mat picture[9];
+	cvtColor(image, picture[0], COLOR_BGR2GRAY);
+	picture[1] = fil.AverageFilter();
+	picture[2] = fil.LightnessFilter();
+	picture[3] = fil.LuminosityFilter();
+	picture[4] = fil.PhotoshopFilter();
+	picture[5] = fil.ITU_R();
+	picture[6] = fil.Max();
+	picture[7] = fil.Min();
+	picture[8] = fil.NoName();
+	int key = 10;
+	namedWindow(nf[0], WINDOW_AUTOSIZE);
+	imshow(nf[0], picture[0]);
+	waitKey(1000000000000);
+	bool first = true;
+	while (key!=27) 
+	{
+		if (first) {
+			namedWindow(nf[1], WINDOW_AUTOSIZE);
+			imshow(nf[1], picture[1]);
+			first = false;
+			waitKey(100000);
 		}
-		cout << "          ";
-		for (int j = 0; j < 5; j++)cout << (int)new_image.at<uchar>(i, j) << " ";
-		cout << endl;
-	}
-	waitKey(0);
+		key = _getch();
+		key = _getch();
+		if (key == 75 && curr > 1)
+		{
+			destroyWindow(nf[curr]);
+			curr--;
+			cout << curr << endl;
+		}
+		else if (key == 77 && curr < 8)
+		{
+			destroyWindow(nf[curr]);
+			curr++;
+			cout << curr << endl;
+		}
+		namedWindow(nf[curr], WINDOW_AUTOSIZE);
+		imshow(nf[curr], picture[curr]);
+		waitKey(10000000);
+	}		
+	destroyAllWindows();
+	return 0;
 }
 
 
