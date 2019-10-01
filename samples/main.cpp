@@ -9,8 +9,8 @@ const char* cmdOptions =
 int main(int argc,char** argv) {
 	
 	CommandLineParser parser(argc, argv, cmdOptions);
-	string path_to_image(parser.get<String>( "image"));
-	Mat image = imread(path_to_image);
+	string path_to_image(parser.get<String>("image"));
+	Mat image = imread("C:\\Users\\aaron\\OneDrive\\Рабочий стол\\OU\\picture\\cat.jpg");
 	if (image.empty()) {
 		cout << "Failed load image" << endl;
 		return -1;
@@ -21,7 +21,7 @@ int main(int argc,char** argv) {
 	int curr = 1;
 	string nf[9] = { "Opencv grey", "Average", "Lightness", "Luminosity", "Photoshop","ITU_R", "Max", "Min", "Noname" };//namef filter
 	Mat picture[9];
-	cvtColor(image, picture[0], COLOR_BGR2GRAY);
+	picture[0] = new_image;
 	picture[1] = fil.AverageFilter();
 	picture[2] = fil.LightnessFilter();
 	picture[3] = fil.LuminosityFilter();
@@ -33,7 +33,7 @@ int main(int argc,char** argv) {
 	int key = 10;
 	namedWindow(nf[0], WINDOW_AUTOSIZE);
 	imshow(nf[0], picture[0]);
-	waitKey(1000000000000);
+	waitKey(1);
 	bool first = true;
 	while (key!=27) 
 	{
@@ -41,11 +41,11 @@ int main(int argc,char** argv) {
 			namedWindow(nf[1], WINDOW_AUTOSIZE);
 			imshow(nf[1], picture[1]);
 			first = false;
-			waitKey(100000);
+			waitKey(1);
 		}
 		key = _getch();
 		key = _getch();
-		if (key == 75 && curr > 1)
+		if (key ==75 && curr > 1)
 		{
 			destroyWindow(nf[curr]);
 			curr--;
@@ -59,7 +59,7 @@ int main(int argc,char** argv) {
 		}
 		namedWindow(nf[curr], WINDOW_AUTOSIZE);
 		imshow(nf[curr], picture[curr]);
-		waitKey(10000000);
+		waitKey(1);
 	}		
 	destroyAllWindows();
 	return 0;
