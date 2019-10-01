@@ -28,14 +28,30 @@ int Find_Min(int a, int b, int c) {
 	else if (b < c)return b;
 	else return c;
 }
+
 int Check_Diff(Mat or, Mat check) {
 	int res = 0;
 	for (int i = 0; i < check.rows; i++) {
 		for (int j = 0; j < check.cols; j++) {
-			res += (int) or .at<uchar>(i, j) - (int)check.at<Vec3b>(i, j)[0];
+			res += abs((int) or.at<uchar>(i, j) - (int)check.at<Vec3b>(i, j)[0]);
 		}
 	}
-	return res;;
+	return abs(res/(or.rows*or.cols));
+}
+
+Mat Print_Problems(Mat cv_img, Mat oth_img, int diff,int &missed) {
+	Mat result = oth_img.clone();
+	for (int i = 0; i < cv_img.rows; i++) {
+		for (int j = 0; j < cv_img.cols; j++) {
+			if (abs((int)cv_img.at<uchar>(i, j) - (int)oth_img.at<Vec3b>(i, j)[0]) > diff) {
+				result.at<Vec3b>(i, j)[2] = 255;
+				result.at<Vec3b>(i, j)[1] = 0;
+				result.at<Vec3b>(i, j)[0] = 0;
+				missed++;
+			}
+		}
+	}
+	return result;
 }
 
 
