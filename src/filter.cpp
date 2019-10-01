@@ -6,11 +6,6 @@
 using namespace std;
 using namespace cv;
 
-int Clamp(int a, int b) {
-	if (a - b < 0)return 0;
-	return a - b;
-}
-
 int Find_Max(int a, int b, int c) {
 	if (a > b) {
 		if (a > c)return a;
@@ -29,39 +24,43 @@ int Find_Min(int a, int b, int c) {
 	else return c;
 }
 
-int Check_Diff(Mat or, Mat check) {
-	int res = 0;
-	for (int i = 0; i < check.rows; i++) {
-		for (int j = 0; j < check.cols; j++) {
-			res += abs((int) or.at<uchar>(i, j) - (int)check.at<Vec3b>(i, j)[0]);
-		}
-	}
-	return abs(res/(or.rows*or.cols));
-}
-
-Mat Print_Problems(Mat cv_img, Mat oth_img, int diff,int &missed) {
-	Mat result = oth_img.clone();
-	for (int i = 0; i < cv_img.rows; i++) {
-		for (int j = 0; j < cv_img.cols; j++) {
-			if (abs((int)cv_img.at<uchar>(i, j) - (int)oth_img.at<Vec3b>(i, j)[0]) > diff) {
-				result.at<Vec3b>(i, j)[2] = 255;
-				result.at<Vec3b>(i, j)[1] = 0;
-				result.at<Vec3b>(i, j)[0] = 0;
-				missed++;
+class All_Fill {
+protected:
+	int cc;
+	Mat img1, img2;
+public:
+	All_Fill() { cc = 0; }
+	void Count_CC(Mat orig) {
+		int res = 0;
+		for (int i = 0; i < orig.rows; i++) {
+			for (int j = 0; j < orig.cols; j++) {
+				res += abs((int)orig.at<uchar>(i, j) - (int)img1.at<Vec3b>(i, j)[0]);
 			}
 		}
-	}
-	return result;
-}
+		cc = abs(res / (orig.rows * orig.cols));
+	};
+	int Get_CC() { return cc; }
 
+	void Make_Problems(Mat orig) {
+		Mat result = img1.clone();
+		for (int i = 0; i < orig.rows; i++) {
+			for (int j = 0; j < orig.cols; j++) {
+				if (abs((int)orig.at<uchar>(i, j) - (int)img1.at<Vec3b>(i, j)[0]) > cc) {
+					result.at<Vec3b>(i, j)[2] = 255;
+					result.at<Vec3b>(i, j)[1] = 0;
+					result.at<Vec3b>(i, j)[0] = 0;
+				}
+			}
+		}
+		img2 = result.clone();
+	};
+	Mat Get_Mat1() { return img1; }
+	Mat Get_Mat2() { return img2; }
+};
 
-
-
-class Filter {
-	Mat img;
+class Avg_Fill :public All_Fill {
 public:
-	Filter(Mat img1) { img = img1; }
-	Mat AverageFilter() {
+	Avg_Fill(Mat img) {
 		Mat result = img.clone();
 		for (int i = 0; i < result.rows; i++) {
 			for (int j = 0; j < result.cols; j++) {
@@ -71,9 +70,13 @@ public:
 				result.at<Vec3b>(i, j)[2] = intense;
 			}
 		}
-		return result;
+		img1 = result;
 	}
-	Mat LightnessFilter() {
+};
+
+class Light_Fill :public All_Fill {
+public:
+	Light_Fill(Mat img) {
 		Mat result = img.clone();
 		for (int i = 0; i < result.rows; i++) {
 			for (int j = 0; j < result.cols; j++) {
@@ -83,9 +86,13 @@ public:
 				result.at<Vec3b>(i, j)[2] = intense;
 			}
 		}
-		return result;
+		img1 = result.clone();
 	}
-	Mat LuminosityFilter() {
+};
+
+class Lum_Fill :public All_Fill {
+public:
+	Lum_Fill(Mat img) {
 		Mat result = img.clone();
 		for (int i = 0; i < result.rows; i++) {
 			for (int j = 0; j < result.cols; j++) {
@@ -95,9 +102,13 @@ public:
 				result.at<Vec3b>(i, j)[2] = intense;
 			}
 		}
-		return result;
+		img1 = result.clone();
 	}
-	Mat PhotoshopFilter() {
+};
+
+class Ph_Fill :public All_Fill {
+public:
+	Ph_Fill(Mat img) {
 		Mat result = img.clone();
 		for (int i = 0; i < result.rows; i++) {
 			for (int j = 0; j < result.cols; j++) {
@@ -107,9 +118,13 @@ public:
 				result.at<Vec3b>(i, j)[2] = intense;
 			}
 		}
-		return result;
+		img1 = result.clone();
 	}
-	Mat ITU_R() {
+};
+
+class ITU_R_Fill :public All_Fill {
+public:
+	ITU_R_Fill(Mat img) {
 		Mat result = img.clone();
 		for (int i = 0; i < result.rows; i++) {
 			for (int j = 0; j < result.cols; j++) {
@@ -119,10 +134,13 @@ public:
 				result.at<Vec3b>(i, j)[2] = intense;
 			}
 		}
-		return result;
+		img1 = result.clone();
 	}
+};
 
-	Mat Max() {
+class Max_Fill :public All_Fill {
+public:
+	Max_Fill(Mat img) {
 		Mat result = img.clone();
 		for (int i = 0; i < result.rows; i++) {
 			for (int j = 0; j < result.cols; j++) {
@@ -132,10 +150,13 @@ public:
 				result.at<Vec3b>(i, j)[2] = intense;
 			}
 		}
-		return result;
+		img1 = result.clone();
 	}
+};
 
-	Mat Min() {
+class Min_Fill :public All_Fill {
+public:
+	Min_Fill(Mat img) {
 		Mat result = img.clone();
 		for (int i = 0; i < result.rows; i++) {
 			for (int j = 0; j < result.cols; j++) {
@@ -145,10 +166,13 @@ public:
 				result.at<Vec3b>(i, j)[2] = intense;
 			}
 		}
-		return result;
+		img1 = result.clone();
 	}
+};
 
-	Mat NoName() {
+class NN_Fill :public All_Fill {
+public:
+	NN_Fill(Mat img) {
 		Mat result = img.clone();
 		for (int i = 0; i < result.rows; i++) {
 			for (int j = 0; j < result.cols; j++) {
@@ -158,7 +182,6 @@ public:
 				result.at<Vec3b>(i, j)[2] = intense;
 			}
 		}
-		return result;
+		img1 = result.clone();
 	}
-
 };
