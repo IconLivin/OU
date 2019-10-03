@@ -2,6 +2,9 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 #include <string>
+#include <iomanip>
+#include <fstream>
+#include <conio.h>
 
 using namespace std;
 using namespace cv;
@@ -24,10 +27,71 @@ int Find_Min(int a, int b, int c) {
 	else return c;
 }
 
+void ClearFile(ofstream& out,string path_file)
+{
+	/*out.open("D:\\GithubProjects\\Computer Graphics\\OU\\info.txt");*/
+	out.open(path_file);
+	if (!out.is_open())
+		cout << "Error open file " << path_file << endl;
+	out.close();
+}
+
+int MaxDiff(Mat diff)
+{
+	int max = 0;
+	for (int i = 0; i < diff.rows; i++)
+		for (int j = 0; j < diff.cols; j++)
+			if (max < diff.at<uchar>(i, j))
+				max = diff.at<uchar>(i, j);
+	return max;
+}
+
+void WriteInfo(Mat image, ofstream& out, string path_file,string path_image, string name,int diff) //write matrix in file
+{
+	out << endl;
+	out.open(path_file, ios::app);
+	if (out.is_open())
+	{
+		out << "Image" << path_image << endl;
+		out << "Filter " << name << endl;
+		out << "Max " << MaxDiff(image) << endl;
+		out << "CC " << diff << endl;
+		if (image.rows <= 180 && image.cols < 180) {
+			for (int i = 0; i < image.rows; i++) {
+				for (int j = 0; j < image.cols; j++)
+				{
+					int num = (int)image.at<uchar>(i, j);
+					if (num < 10)
+						out << right << setw(6) << num;
+					else if (num < 100)
+						out << right << setw(5) << num;
+					else
+						out << right << setw(4) << num;
+				}
+				out << endl;
+			}
+		}
+	}
+	else
+		cout << "Error open file in function WriteInfo " << path_file << endl;
+	out << endl;
+	out.close();
+}
+
+Mat Difference(Mat greyCV, Mat fil) // Matrix difference
+{
+
+	Mat result(greyCV.rows, greyCV.cols, CV_8UC1); //create monochro
+	for (int i = 0; i < greyCV.rows; i++)
+		for (int j = 0; j < greyCV.cols; j++)
+			result.at<uchar>(i, j) = abs((int)greyCV.at<uchar>(i, j) - (int)fil.at<Vec3b>(i, j)[0]);
+	return result;
+}
+
 class All_Fill {
 protected:
 	int cc;
-	Mat img1, img2;
+	Mat img1, img2, img3;
 public:
 	All_Fill() { cc = 0; }
 	void Count_CC(Mat orig) {
@@ -42,7 +106,7 @@ public:
 	int Get_CC() { return cc; }
 
 	void Make_Problems(Mat orig) {
-		Mat result = img1.clone();
+		Mat result = img1.clone(); 
 		for (int i = 0; i < orig.rows; i++) {
 			for (int j = 0; j < orig.cols; j++) {
 				if (abs((int)orig.at<uchar>(i, j) - (int)img1.at<Vec3b>(i, j)[0]) > cc) {
@@ -54,8 +118,39 @@ public:
 		}
 		img2 = result.clone();
 	};
+	void Formula(Mat orig) 
+	{
+		Mat diff = Difference(orig, img1).clone();
+		Mat ni(diff.rows, diff.cols, CV_8UC3);
+		for (int i = 0; i < diff.rows; i++) {
+			for (int j = 0; j < diff.cols; j++) {
+				if ((int)diff.at<uchar>(i, j) < 8)
+					ni.at<Vec3b>(i, j) = Vec3b(128, 0, 0);
+				if ( (int)diff.at<uchar>(i,j)<20)
+					ni.at<Vec3b>(i, j) = Vec3b(0, 255, 0);
+				else if ((int)diff.at<uchar>(i, j) < 40)
+					ni.at<Vec3b>(i, j) = Vec3b(0, 128, 0);
+				else if ((int)diff.at<uchar>(i, j) < 60)
+					ni.at<Vec3b>(i, j) = Vec3b(0, 255, 255);
+				else if ((int)diff.at<uchar>(i, j) < 80)
+					ni.at<Vec3b>(i, j) = Vec3b(0, 165, 255);
+				else if ((int)diff.at<uchar>(i, j) < 100)
+					ni.at<Vec3b>(i, j) = Vec3b(0, 0, 255);
+				else if ((int)diff.at<uchar>(i, j) < 120)
+					ni.at<Vec3b>(i, j) = Vec3b(0, 0, 128);
+				else
+					ni.at<Vec3b>(i, j) = Vec3b(0, 0, 0);
+
+			}
+		}
+
+		/*imshow("New", ni);
+		waitKey(0);*/
+		img3 = ni.clone();
+	}
 	Mat Get_Mat1() { return img1; }
 	Mat Get_Mat2() { return img2; }
+	Mat Get_Mat3() { return img3; }
 };
 
 class Avg_Fill :public All_Fill {
