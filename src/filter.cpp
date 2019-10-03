@@ -120,30 +120,33 @@ public:
 	};
 	void Formula(Mat orig) 
 	{
-		Mat result = Difference(orig, img1);
-		for (int i = 0; i < result.rows; i++) {
-			for (int j = 0; j < result.cols; j++) {
-				if ((int)result.at<uchar>(i, j)>5 && (int)result.at<uchar>(i,j)<20)
-					result.at<Vec3b>(i, j) = Vec3b(0, 255, 0);
-				else if ((int)result.at<uchar>(i, j) < 40)
-					result.at<Vec3b>(i, j) = Vec3b(47, 255, 173);
-				else if ((int)result.at<uchar>(i, j) < 60)
-					result.at<Vec3b>(i, j) = Vec3b(0, 255, 255);
-				else if ((int)result.at<uchar>(i, j) < 80)
-					result.at<Vec3b>(i, j) = Vec3b(0, 165, 255);
-				else if ((int)result.at<uchar>(i, j) < 100)
-					result.at<Vec3b>(i, j) = Vec3b(0, 69, 255);
-				else if ((int)result.at<uchar>(i, j) < 120)
-					result.at<Vec3b>(i, j) = Vec3b(0, 0, 255);
-				else if ((int)result.at<uchar>(i, j) < 140)
-					result.at<Vec3b>(i, j) = Vec3b(0, 0, 128);
-				else if ((int)result.at<uchar>(i, j) < 160)
-					result.at<Vec3b>(i, j) = Vec3b(19, 69, 139);
-				else if ((int)result.at<uchar>(i, j) < 180)
-					result.at<Vec3b>(i, j) = Vec3b(0, 0, 0);
+		Mat diff = Difference(orig, img1).clone();
+		Mat ni(diff.rows, diff.cols, CV_8UC3);
+		for (int i = 0; i < diff.rows; i++) {
+			for (int j = 0; j < diff.cols; j++) {
+				if ((int)diff.at<uchar>(i, j) < 8)
+					ni.at<Vec3b>(i, j) = Vec3b(128, 0, 0);
+				if ( (int)diff.at<uchar>(i,j)<20)
+					ni.at<Vec3b>(i, j) = Vec3b(0, 255, 0);
+				else if ((int)diff.at<uchar>(i, j) < 40)
+					ni.at<Vec3b>(i, j) = Vec3b(0, 128, 0);
+				else if ((int)diff.at<uchar>(i, j) < 60)
+					ni.at<Vec3b>(i, j) = Vec3b(0, 255, 255);
+				else if ((int)diff.at<uchar>(i, j) < 80)
+					ni.at<Vec3b>(i, j) = Vec3b(0, 165, 255);
+				else if ((int)diff.at<uchar>(i, j) < 100)
+					ni.at<Vec3b>(i, j) = Vec3b(0, 0, 255);
+				else if ((int)diff.at<uchar>(i, j) < 120)
+					ni.at<Vec3b>(i, j) = Vec3b(0, 0, 128);
+				else
+					ni.at<Vec3b>(i, j) = Vec3b(0, 0, 0);
+
 			}
 		}
-		img3 = result.clone();
+
+		/*imshow("New", ni);
+		waitKey(0);*/
+		img3 = ni.clone();
 	}
 	Mat Get_Mat1() { return img1; }
 	Mat Get_Mat2() { return img2; }
