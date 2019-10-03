@@ -52,10 +52,10 @@ void WriteInfo(Mat image, ofstream& out, string path_file,string path_image, str
 	out.open(path_file, ios::app);
 	if (out.is_open())
 	{
-		out << "Image" << path_image << endl;
-		out << "Filter " << name << endl;
-		out << "Max " << MaxDiff(image) << endl;
-		out << "CC " << diff << endl;
+		out << "Image:" << path_image << endl;
+		out << "Filter:" << name << endl;
+		out << "Max:" << MaxDiff(image) << endl;
+		out << "Mistake:" << diff << endl;
 		if (image.rows <= 180 && image.cols < 180) {
 			for (int i = 0; i < image.rows; i++) {
 				for (int j = 0; j < image.cols; j++)
