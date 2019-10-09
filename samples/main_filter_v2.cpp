@@ -11,8 +11,10 @@ int main(int argc, char** argv) {
 
 	CommandLineParser parser(argc, argv, cmdOptions);
 	ofstream out;
-	string path_to_image = "C:\\Users\\aaron\\OneDrive\\Рабочий стол\\OU\\picture\\lob.jpg";
-	string path_to_file = "File.txt";
+	/*string path_to_image = "C:\\Users\\aaron\\OneDrive\\Рабочий стол\\OU\\picture\\lob.jpg";
+	string path_to_file = "File.txt";*/
+	string path_to_image(parser.get<String>("image"));
+	string path_to_file(parser.get<String>("file"));
 	Mat image = imread(path_to_image);
 	if (image.empty()) {
 		cout << "Error load image" << endl;

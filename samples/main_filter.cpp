@@ -9,7 +9,10 @@ void main(int argc,char** argv) {
 	
 	CommandLineParser parser(argc, argv, cmdOptions);
 	//string path_to_image(parser.get<String>("C:\\Users\\aaron\\OneDrive\\Рабочий стол\\OU-build\\samples\\lobachevsky.jpg"));
-	Mat image = imread("C:\\Users\\aaron\\OneDrive\\Рабочий стол\\OU\\picture\\lob.jpg");
+	string path_to_image(parser.get<String>( "image")); 
+
+
+	Mat image = imread(path_to_image);
 	Mat cv_grey = image.clone();
 	cvtColor(image, cv_grey, COLOR_BGR2GRAY);
 	string labels[8] = { "Average","Lightness","Luminosity","Photoshop","ITU_R","MAX","MIN","NONAME" };
