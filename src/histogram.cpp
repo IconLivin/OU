@@ -122,7 +122,7 @@ Mat hist_intensity(Mat img) {
 	Mat result(Max_value, 1290, CV_8UC1);
 	cout << Max_value << endl << result.rows << endl;
 	for (int i = 0; i < 256; i++) {
-		if (gist_intensity[i] != 0)
+		if (gist_intensity[i] > 1)
 		{
 			line(result, p, Point(p.x, result.rows - gist_intensity[i]), Scalar(255, 255, 255), 2);
 			p.x += 5;

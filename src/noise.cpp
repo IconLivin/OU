@@ -14,16 +14,36 @@ Mat createNoise(Mat image, Mat noise)
 	return image + noise;
 }
 
-Mat gauss_noise(int rows,int cols) 
-{	Mat img(rows, cols, CV_8UC1);
+Mat gauss_noise(int rows,int cols,bool flag) 
+{
 	std::random_device rd;
 	std::mt19937 gen(rd());
-	std::normal_distribution<> d(5,1);
-	for (int i = 0; i < img.rows; i++)
-		for (int j = 0; j < img.cols; j++)
-			img.at <uchar>(i, j) = abs((int) d(gen)*2);
-	return img;
+	std::normal_distribution<> d(5, 1);
+	Mat result;
+	if (flag == 0)
+	{
+		Mat img(rows, cols, CV_8UC1);
+		for (int i = 0; i < img.rows; i++)
+			for (int j = 0; j < img.cols; j++)
+				img.at <uchar>(i, j) = abs((int)d(gen) * 2);
+		result = img.clone();
+	}
+	else 
+	{
+		Mat img(rows, cols, CV_8UC3);
+		result = img.clone();
+		for (int i = 0; i < img.rows; i++)
+			for (int j = 0; j < img.cols; j++) {
+				img.at <Vec3b>(i, j)[0] = abs((int)d(gen) * 2);
+				img.at <Vec3b>(i, j)[1] = abs((int)d(gen) * 2);
+				img.at <Vec3b>(i, j)[2] = abs((int)d(gen) * 2);
+			}
+				result = img.clone();
+	}
+	return result;
 }
+
+
 //Mat CreateNoise(/*Mat img,*/ double mu, double sigma)
 //{
 //	//Mat image(img.rows, img.cols, CV_8UC1);
