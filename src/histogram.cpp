@@ -46,6 +46,7 @@ public:
 	}
 };
 
+
 Mat Build_Gist(Mat img) {
 	int Gist_R[256];
 	int Gist_G[256];
@@ -95,6 +96,37 @@ Mat Build_Gist(Mat img) {
 			cc++;
 		}
 		if (++counter == 256)break;
+	}
+	return result;
+}
+
+Mat hist_intensity(Mat img) {
+	int gist_intensity[256];
+	for (int i = 0; i < 256; i++)
+		gist_intensity[i] = 0;
+	int Max_value = 0;;
+	for (int i = 0; i < img.rows; i++) { 
+		for (int j = 0; j < img.cols; j++) {
+			gist_intensity[img.at<uchar>(i, j)]++;
+			}
+	}
+	for (int i = 0; i < 256; i++)
+		if (gist_intensity[i] > Max_value)Max_value = gist_intensity[i];
+	while (Max_value > 700) {
+		for (int i = 0; i < 256; i++) {
+			gist_intensity[i] /= 2;
+		}
+		Max_value /= 2;
+	}
+	Point p(0, Max_value );
+	Mat result(Max_value, 1290, CV_8UC1);
+	cout << Max_value << endl << result.rows << endl;
+	for (int i = 0; i < 256; i++) {
+		if (gist_intensity[i] != 0)
+		{
+			line(result, p, Point(p.x, result.rows - gist_intensity[i]), Scalar(255, 255, 255), 2);
+			p.x += 5;
+		}
 	}
 	return result;
 }
