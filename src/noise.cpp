@@ -9,39 +9,86 @@ using namespace cv;
 
 const float PI = 3.14159265358979323846;
 
+int Clamp(int x) {
+	int n = x > 0 ? x : 0;
+	n = x < 256 ? x : 255;
+	return n;
+}
+
+
 Mat createNoise(Mat image, Mat noise) 
 {
 	return image + noise;
 }
 
-Mat gauss_noise(int rows,int cols,bool flag) 
-{
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	std::normal_distribution<> d(5, 1);
-	Mat result;
-	if (flag == 0)
-	{
-		Mat img(rows, cols, CV_8UC1);
-		for (int i = 0; i < img.rows; i++)
-			for (int j = 0; j < img.cols; j++)
-				img.at <uchar>(i, j) = abs((int)d(gen) * 2);
-		result = img.clone();
+
+Mat Generate_Mask_Gauss(int size_x, int size_y,double pr=0.2) {
+	random_device rd;
+	mt19937 gen(rd());
+	normal_distribution<> d(20, 1);
+	Mat result(size_x, size_y, CV_8UC3);
+	srand(time(NULL));
+	for (int i = 0; i < result.rows; i++) {
+		for (int j = 0; j < result.cols; j++) {
+			result.at<Vec3b>(i, j) = 0;
+		} 
 	}
-	else 
-	{
-		Mat img(rows, cols, CV_8UC3);
-		result = img.clone();
-		for (int i = 0; i < img.rows; i++)
-			for (int j = 0; j < img.cols; j++) {
-				img.at <Vec3b>(i, j)[0] = abs((int)d(gen) * 2);
-				img.at <Vec3b>(i, j)[1] = abs((int)d(gen) * 2);
-				img.at <Vec3b>(i, j)[2] = abs((int)d(gen) * 2);
-			}
-				result = img.clone();
+	for (int i = 0; i < size_x * size_y * pr; i++) {
+		int x = rand() % size_x;
+		int y = rand() % size_y;
+		result.at<Vec3b>(x, y)[0] = result.at < Vec3b>(x, y)[1] = result.at < Vec3b>(x, y)[2] = abs(d(gen));
 	}
 	return result;
 }
+
+Mat Generate_Mask_Gamma(int size_x, int size_y,double pr=0.2) {
+	random_device rd;
+	mt19937 gen(rd());
+	gamma_distribution<> d(10,2);
+	Mat result(size_x, size_y, CV_8UC3);
+	srand(time(NULL));
+	for (int i = 0; i < result.rows; i++) {
+		for (int j = 0; j < result.cols; j++) {
+			result.at<Vec3b>(i, j) = 0;
+		}
+	}
+	for (int i = 0; i < size_x * size_y * pr; i++) {
+		int x = rand() % size_x;
+		int y = rand() % size_y;
+		result.at<Vec3b>(x, y)[0] = result.at < Vec3b>(x, y)[1] = result.at < Vec3b>(x, y)[2] = abs(d(gen));
+	}
+	return result;
+}
+
+
+//Mat gauss_noise(int rows,int cols,bool flag) 
+//{
+//	std::random_device rd;
+//	std::mt19937 gen(rd());
+//	std::normal_distribution<> d(5, 1);
+//	Mat result;
+//	if (flag == 0)
+//	{
+//		Mat img(rows, cols, CV_8UC1);
+//		for (int i = 0; i < img.rows; i++)
+//			for (int j = 0; j < img.cols; j++)
+//				img.at <uchar>(i, j) = abs((int)d(gen) * 2);
+//		result = img.clone();
+//	}
+//	else 
+//	{
+//		Mat img(rows, cols, CV_8UC3);
+//		result = img.clone();
+//		for (int i = 0; i < img.rows; i++)
+//			for (int j = 0; j < img.cols; j++) {
+//				img.at <Vec3b>(i, j)[0] = abs((int)d(gen) * 2);
+//				img.at <Vec3b>(i, j)[1] = abs((int)d(gen) * 2);
+//				img.at <Vec3b>(i, j)[2] = abs((int)d(gen) * 2);
+//			}
+//				result = img.clone();
+//	}
+//	return result;
+//}
 
 
 //Mat CreateNoise(/*Mat img,*/ double mu, double sigma)
@@ -64,6 +111,7 @@ Mat gauss_noise(int rows,int cols,bool flag)
 //class Noise
 //{
 //public:
+//Mat CreateNoise(Mat img, double mu, double sigma) = 0;
 //	Noise(Mat img)
 //	{
 //		image = img;

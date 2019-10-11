@@ -47,7 +47,7 @@ public:
 };
 
 
-Mat Build_Gist(Mat img) {
+Mat Build_Gist(Mat img,bool flag=0) {
 	int Gist_R[256];
 	int Gist_G[256];
 	int Gist_B[256];
@@ -60,9 +60,18 @@ Mat Build_Gist(Mat img) {
 	int Max_value = 0;;
 	for (int i = 0; i < img.rows; i++) { 
 		for (int j = 0; j < img.cols; j++) {
-			Gist_R[img.at<Vec3b>(i, j)[0]]++;
-			Gist_G[img.at<Vec3b>(i, j)[1]]++;
-			Gist_B[img.at<Vec3b>(i, j)[2]]++;
+			if (flag == 0) {
+				Gist_R[img.at<Vec3b>(i, j)[0]]++;
+				Gist_G[img.at<Vec3b>(i, j)[1]]++;
+				Gist_B[img.at<Vec3b>(i, j)[2]]++;
+			}
+			else if ( img.at<Vec3b>(i, j)[0]!=0 )
+			{
+				int c = img.at<Vec3b>(i, j)[0];
+				Gist_R[img.at<Vec3b>(i, j)[0]]++;
+				Gist_G[img.at<Vec3b>(i, j)[1]]++;
+				Gist_B[img.at<Vec3b>(i, j)[2]]++;
+			}
 		}
 	}
 	for (int i = 0; i < 256; i++) {
@@ -81,10 +90,10 @@ Mat Build_Gist(Mat img) {
 	Mat result(Max_value + 20, 1290, CV_8UC3);
 	cout << Max_value << endl << result.rows << endl;
 	int counter = 0;
-	for (int i = 2; i < result.cols; i+=5) {
+	for (int i = 2; i < result.cols; i += 5) {
 		color_queue c(Gist_R[counter], Gist_G[counter], Gist_B[counter]);
 		int cc = 0;
-		for (int j = result.rows-1; j>result.rows-Find_Max_Ch(Gist_R[counter],Gist_G[counter],Gist_B[counter]);) {
+		for (int j = result.rows - 1; j > result.rows - Find_Max_Ch(Gist_R[counter], Gist_G[counter], Gist_B[counter]);) {
 			int k = 0;
 			while (k < c.mas[cc].count) {
 				for (int i1 = 0; i1 < 4; i1++) {

@@ -8,37 +8,6 @@ const char* cmdOptions =
 ///BLAck and White
 
 
-int main(int argc,char** argv) {
-	
-	CommandLineParser parser(argc, argv, cmdOptions);
-	namedWindow("Noise", WINDOW_NORMAL);
-	namedWindow("Hist", WINDOW_NORMAL);
-	namedWindow("Image", WINDOW_NORMAL);
-	namedWindow("Result", WINDOW_NORMAL);
-	namedWindow("Hist result", WINDOW_NORMAL);
-	namedWindow("Hist noise", WINDOW_NORMAL);
-	//string path_to_image(parser.get<String>("C:\\Users\\aaron\\OneDrive\\Рабочий стол\\OU-build\\samples\\lobachevsky.jpg"));
-	Mat image = imread("../../OU/picture/lob.jpg");
-	if (image.empty()) {
-		cout << "Error load image" << endl;
-		return -1;
-	}
-	Mat dst(image.rows, image.cols, CV_8UC1);
-	cvtColor(image, dst, COLOR_BGR2GRAY);
-	Mat noise(gauss_noise(image.rows,image.cols,false));
-	imshow("Image", image);
-	imshow("Noise", noise);
-	imshow("Hist", hist_intensity(dst));
-	cout << dst.rows << " " << dst.cols << endl;
-	cout << image.rows << " " << image.cols << endl;
-	imshow("Result", createNoise(noise,dst));
-	imshow("Hist noise", hist_intensity(noise));
-	imshow("Hist result", hist_intensity(createNoise(noise, dst)));
-	waitKey();
-	return 0;
-}
-
-////Colorfull
 //int main(int argc,char** argv) {
 //	
 //	CommandLineParser parser(argc, argv, cmdOptions);
@@ -54,16 +23,47 @@ int main(int argc,char** argv) {
 //		cout << "Error load image" << endl;
 //		return -1;
 //	}
-//	Mat noise(gauss_noise(image.rows,image.cols,1));
+//	Mat dst(image.rows, image.cols, CV_8UC1);
+//	cvtColor(image, dst, COLOR_BGR2GRAY);
+//	Mat noise(gauss_noise(image.rows,image.cols,false));
 //	imshow("Image", image);
-//	imshow("Hist", Build_Gist(image));
 //	imshow("Noise", noise);
-//	imshow("Result", createNoise(noise,image));
-//	imshow("Hist noise", Build_Gist(noise));
-//	imshow("Hist result", Build_Gist(createNoise(noise, image)));
+//	imshow("Hist", hist_intensity(dst));
+//	cout << dst.rows << " " << dst.cols << endl;
+//	cout << image.rows << " " << image.cols << endl;
+//	imshow("Result", createNoise(noise,dst));
+//	imshow("Hist noise", hist_intensity(noise));
+//	imshow("Hist result", hist_intensity(createNoise(noise, dst)));
 //	waitKey();
 //	return 0;
 //}
+
+////Colorfull
+int main(int argc,char** argv) {
+	
+	CommandLineParser parser(argc, argv, cmdOptions);
+	namedWindow("Noise", WINDOW_NORMAL);
+	namedWindow("Hist", WINDOW_NORMAL);
+	namedWindow("Image", WINDOW_NORMAL);
+	namedWindow("Result", WINDOW_NORMAL);
+	namedWindow("Hist result", WINDOW_NORMAL);
+	namedWindow("Hist noise", WINDOW_NORMAL);
+	//string path_to_image(parser.get<String>("C:\\Users\\aaron\\OneDrive\\Рабочий стол\\OU-build\\samples\\lobachevsky.jpg"));
+	Mat image = imread("../../OU/picture/lob.jpg");
+	if (image.empty()) {
+		cout << "Error load image" << endl;
+		return -1;
+	}
+	Mat noise(Generate_Mask_Gamma(image.rows,image.cols,0.75));
+	imshow("Image", image);
+	imshow("Hist", Build_Gist(image));
+	imshow("Noise", noise);
+	imshow("Result", createNoise(noise,image)); 
+	imshow("Hist noise", Build_Gist(noise,1));
+	imshow("Hist result", Build_Gist(createNoise(noise, image)));
+	waitKey();
+	return 0;
+}
 
 
 
