@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <fstream>
 #include <conio.h>
+#include <random>
 
 using namespace std;
 using namespace cv;
@@ -45,6 +46,51 @@ public:
 
 	}
 };
+
+int Clamp(int x) {
+	int n = x > 0 ? x : 0;
+	n = x < 256 ? x : 255;
+	return n;
+}
+
+
+Mat Generate_Mask_Gauss(int size_x,int size_y) {
+	random_device rd;
+	mt19937 gen(rd());
+	normal_distribution<> d(20, 1);
+	Mat result(size_x, size_y, CV_8UC3);
+	srand(time(NULL));
+	for (int i = 0; i < result.rows; i++) {
+		for (int j = 0; j < result.cols; j++) {
+			result.at<Vec3b>(i, j) = 0;
+		}
+	}
+	for (int i = 0; i < size_x * size_y * 0.8; i++) {
+		int x = rand() % size_x;
+		int y = rand() % size_y;
+		result.at<Vec3b>(x, y)[0] = result.at < Vec3b>(x, y)[1] = result.at < Vec3b>(x, y)[2] = abs(d(gen));
+	}
+	return result;
+}
+
+Mat Generate_Mask_Gamma(int size_x, int size_y) {
+	random_device rd;
+	mt19937 gen(rd());
+	gamma_distribution<> d(60, 0.5);
+	Mat result(size_x, size_y, CV_8UC3);
+	srand(time(NULL));
+	for (int i = 0; i < result.rows; i++) {
+		for (int j = 0; j < result.cols; j++) {
+			result.at<Vec3b>(i, j) = 0;
+		}
+	}
+	for (int i = 0; i < size_x * size_y * 0.8; i++) {
+		int x = rand() % size_x;
+		int y = rand() % size_y;
+		result.at<Vec3b>(x, y)[0] = result.at < Vec3b>(x, y)[1] = result.at < Vec3b>(x, y)[2] = abs(d(gen));
+	}
+	return result;
+}
 
 Mat Build_Gist(Mat img) {
 	int Gist_R[256];
@@ -95,6 +141,64 @@ Mat Build_Gist(Mat img) {
 			cc++;
 		}
 		if (++counter == 256)break;
+	}
+	return result;
+}
+
+Mat Build_Gray_Hist(Mat img) {
+	int Gist[256];
+	for (int i = 0; i < 256; i++)Gist[i] = 0;
+	int Max_value = 0;;
+	for (int i = 0; i < img.rows; i++) {
+		for (int j = 0; j < img.cols; j++) {
+			Gist[img.at<uchar>(i, j)]++;
+		}
+	}
+	for (int i = 0; i < 256; i++) {
+		if (Gist[i] > Max_value)Max_value = Gist[i];
+	}
+	while (Max_value > 700) {
+		for (int i = 0; i < 256; i++) {
+			Gist[i] /= 2;
+		}
+		Max_value /= 2;
+	}
+	Mat result(Max_value + 20, 1290, CV_8UC1);
+	cout << Max_value << endl << result.rows << endl;
+	int counter = 0;
+	for (int i = 2; i < result.cols; i += 5) {
+		for (int j = result.rows - 1; j > result.rows - Gist[counter]; j--) {
+			for (int i1 = 0; i1 < 4; i1++) {
+				result.at<uchar>(j, i + i1) = 0;
+			}
+		}
+		if (++counter == 256)break;
+	}
+	return result;
+}
+
+Mat Worse_Img_Gauss(Mat img) {
+	Mat result = img.clone();
+	Mat mask = Generate_Mask_Gauss(result.rows, result.cols);
+	imshow("Win", Build_Gist(mask));
+	waitKey();
+	for (int i = 0; i < result.rows; i++) {
+		for (int j = 0; j < result.cols; j++) {
+			result.at<Vec3b>(i, j) += mask.at<Vec3b>(i, j);
+		}
+	}
+	return result;
+}
+
+Mat Worse_Img_Gamma(Mat img) {
+	Mat result = img.clone();
+	Mat mask = Generate_Mask_Gamma(result.rows, result.cols);
+	imshow("Win", Build_Gist(mask));
+	waitKey();
+	for (int i = 0; i < result.rows; i++) {
+		for (int j = 0; j < result.cols; j++) {
+			result.at<Vec3b>(i, j) += mask.at<Vec3b>(i, j);
+		}
 	}
 	return result;
 }
