@@ -4,7 +4,6 @@
 #include <string>
 #include <iomanip>
 #include <fstream>
-#include <conio.h>
 
 using namespace std;
 using namespace cv;

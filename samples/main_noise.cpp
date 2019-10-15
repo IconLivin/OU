@@ -42,26 +42,53 @@ const char* cmdOptions =
 int main(int argc,char** argv) {
 	
 	CommandLineParser parser(argc, argv, cmdOptions);
-	namedWindow("Noise", WINDOW_NORMAL);
-	namedWindow("Hist", WINDOW_NORMAL);
-	namedWindow("Image", WINDOW_NORMAL);
-	namedWindow("Result", WINDOW_NORMAL);
-	namedWindow("Hist result", WINDOW_NORMAL);
-	namedWindow("Hist noise", WINDOW_NORMAL);
 	//string path_to_image(parser.get<String>("C:\\Users\\aaron\\OneDrive\\Рабочий стол\\OU-build\\samples\\lobachevsky.jpg"));
 	Mat image = imread("../../OU/picture/lob.jpg");
 	if (image.empty()) {
 		cout << "Error load image" << endl;
 		return -1;
 	}
-	Mat noise(Generate_Mask_Gamma(image.rows,image.cols,0.75));
-	imshow("Image", image);
-	imshow("Hist", Build_Gist(image));
-	imshow("Noise", noise);
-	imshow("Result", createNoise(noise,image)); 
-	imshow("Hist noise", Build_Gist(noise,1));
-	imshow("Hist result", Build_Gist(createNoise(noise, image)));
-	waitKey();
+	string labels[2] = { "Gauss","Gamma" };
+	Mat noise[2];
+	int key = 0;
+	int curr = 0;
+	noise[0] = Generate_Mask_Gamma(image.rows, image.cols, 0.3);
+	noise[1] = Generate_Mask_Gamma(image.rows, image.cols, 0.3);
+	while (key != 27) {//esc
+		key = waitKey();
+		cout << key << endl;
+		switch (key)
+		{
+		case 52: {//numpad4
+			if (curr > 0)curr--;
+			system("cls");
+			cout << labels[curr] << endl;
+			break;
+		}
+		case 54: {//numpad6
+			if (curr < 7)curr++;
+			system("cls");
+			cout << labels[curr] << endl;
+			break;
+		}
+		}
+		namedWindow("Image", WINDOW_NORMAL);
+		namedWindow("Noise", WINDOW_NORMAL);
+		namedWindow("Result", WINDOW_NORMAL);
+		namedWindow("Hist image", WINDOW_NORMAL);
+		namedWindow("Hist noise", WINDOW_NORMAL);
+		namedWindow("Hist result", WINDOW_NORMAL);
+		imshow("Image", image);
+		imshow("Noise", noise[curr]);
+		imshow("Result", createNoise(image, noise[curr]));
+
+		imshow("Hist image", Build_Gist(image));
+		imshow("Hist noise", Build_Gist(noise[curr],1));
+		imshow("Hist result", Build_Gist(createNoise(image, noise[curr])));
+
+		waitKey(1);
+	}
+	destroyAllWindows();
 	return 0;
 }
 
