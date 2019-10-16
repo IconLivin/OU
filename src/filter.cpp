@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
@@ -279,3 +280,27 @@ public:
 		img1 = result.clone();
 	}
 };
+Mat CreateBlur(char f, Mat src,bool flag=0) 
+{
+	Mat dst(src.rows, src.cols,CV_8UC3);
+	if (flag)
+	{
+		switch (f) 
+		{
+		default:
+			break;
+		}
+	}
+	else 
+	{
+		switch (f) 
+		{
+		case 'G':
+			GaussianBlur(src, dst, Size(5, 5),0);
+			break;
+		case 'M':
+			medianBlur(src, dst,5);
+		}
+	}
+	return dst;
+}
