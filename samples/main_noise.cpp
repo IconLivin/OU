@@ -1,6 +1,6 @@
 #include "histogram.cpp"
 #include "noise.cpp"
-#include <conio.h>
+//#include <conio.h>
 const char* cmdOptions =
 "{ i  image         | <none> | image to process        }"
 "{ q ? help usage   | <none> | print help message      }";
@@ -52,7 +52,7 @@ int main(int argc,char** argv) {
 	Mat noise[2];
 	int key = 0;
 	int curr = 0;
-	noise[0] = Generate_Mask_Gamma(image.rows, image.cols, 0.3);
+	noise[0] = Generate_Mask_Gauss(image.rows, image.cols, 0.3);
 	noise[1] = Generate_Mask_Gamma(image.rows, image.cols, 0.3);
 	while (key != 27) {//esc
 		key = waitKey();

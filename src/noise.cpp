@@ -44,7 +44,7 @@ Mat Generate_Mask_Gauss(int size_x, int size_y,double pr=0.2) {
 Mat Generate_Mask_Gamma(int size_x, int size_y,double pr=0.2) {
 	random_device rd;
 	mt19937 gen(rd());
-	gamma_distribution<> d(10,2);
+	gamma_distribution<> d(10,1);
 	Mat result(size_x, size_y, CV_8UC3);
 	srand(time(NULL));
 	for (int i = 0; i < result.rows; i++) {
