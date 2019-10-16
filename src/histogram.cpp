@@ -1,3 +1,5 @@
+#pragma once
+
 #include <iostream>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
@@ -88,7 +90,6 @@ Mat Build_Gist(Mat img,bool flag=0) {
 		Max_value /= 2;
 	}
 	Mat result(Max_value + 20, 1290, CV_8UC3);
-	cout << Max_value << endl << result.rows << endl;
 	int counter = 0;
 	for (int i = 2; i < result.cols; i += 5) {
 		color_queue c(Gist_R[counter], Gist_G[counter], Gist_B[counter]);

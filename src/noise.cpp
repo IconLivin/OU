@@ -3,6 +3,7 @@
 #include <random>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
+#include "histogram.cpp"
 
 using namespace std;
 using namespace cv;
@@ -15,7 +16,11 @@ int Clamp(int x) {
 	return n;
 }
 
-
+int Clamp(int x, int y, int z) {
+	int n = x < y ? y : x;
+	n = n > z ? z : n;
+	return n;
+}
 Mat createNoise(Mat image, Mat noise) 
 {
 	return image + noise;
@@ -23,20 +28,12 @@ Mat createNoise(Mat image, Mat noise)
 
 
 Mat Generate_Mask_Gauss(int size_x, int size_y,double pr=0.2) {
-	random_device rd;
-	mt19937 gen(rd());
-	normal_distribution<> d(20, 1);
 	Mat result(size_x, size_y, CV_8UC3);
 	srand(time(NULL));
 	for (int i = 0; i < result.rows; i++) {
 		for (int j = 0; j < result.cols; j++) {
 			result.at<Vec3b>(i, j) = 0;
 		} 
-	}
-	for (int i = 0; i < size_x * size_y * pr; i++) {
-		int x = rand() % size_x;
-		int y = rand() % size_y;
-		result.at<Vec3b>(x, y)[0] = result.at < Vec3b>(x, y)[1] = result.at < Vec3b>(x, y)[2] = abs(d(gen));
 	}
 	return result;
 }
@@ -59,6 +56,54 @@ Mat Generate_Mask_Gamma(int size_x, int size_y,double pr=0.2) {
 	}
 	return result;
 }
+
+float** Gauss_Kernel(int radius, float sigma) {
+	int size = 2 * radius + 1;
+	float** kernel = new float* [size];
+	for (int i = 0; i < size; i++) {
+		kernel[i] = new float[size];
+	}
+	float norm = 0;
+	for (int i = 0; i < size; i++)
+		for (int j = 0; j < size; j++)
+		{
+			kernel[i][j] = (float)(exp(-(i * i + j * j) / (sigma * sigma)));
+			norm += kernel[i][j];
+		}
+	for (int i = 0; i < size; i++)
+		for (int j = 0; j < size; j++)
+			kernel[i][j] /= norm;
+	return kernel;
+}
+
+Vec3b Get_Color(float** kernel, Mat img, int size, int x, int y) {
+	Vec3b color = 0;
+	int x1 = 0, y1 = 0;
+	for (int i = x; i < size + x; i++) {
+		y1 = 0;
+		for (int j = y; j < size + y; j++) {
+			color[0] += img.at<Vec3b>(i, j)[0] * kernel[x1][y1];
+			color[1] += img.at<Vec3b>(i, j)[1] * kernel[x1][y1];
+			color[2] += img.at<Vec3b>(i, j)[2] * kernel[x1][y1];
+			y1++;
+		}
+		x1++;
+	}
+	return color;
+}
+
+Mat Gauss_Filter(Mat img) {
+	int n = 3;
+	Mat result = img.clone();
+	float** kernel = Gauss_Kernel(n, 2);
+	for (int i = 2 * n + 1; i < img.rows - (2 * n + 1); i++) {
+		for (int j = 2 * n + 1; j < img.cols - (2 * n + 1); j++) {
+			result.at<Vec3b>(i, j) = Get_Color(kernel, img, 2 * n + 1, i, j);
+		}
+	}
+	return result;
+}
+
 
 
 //Mat gauss_noise(int rows,int cols,bool flag) 
