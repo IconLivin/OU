@@ -1,10 +1,11 @@
+#pragma once
 #include <iostream>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 #include <string>
 #include <iomanip>
 #include <fstream>
-#include <conio.h>
+//#include <conio.h>
 
 using namespace std;
 using namespace cv;

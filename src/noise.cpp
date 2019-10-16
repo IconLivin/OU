@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <math.h>
 #include <random>
@@ -8,6 +9,11 @@ using namespace std;
 using namespace cv;
 
 const float PI = 3.14159265358979323846;
+
+int formula_gauss() 
+{
+return 0;
+}
 
 int Clamp(int x) {
 	int n = x > 0 ? x : 0;
@@ -22,7 +28,7 @@ Mat createNoise(Mat image, Mat noise)
 }
 
 
-Mat Generate_Mask_Gauss(int size_x, int size_y,double pr=0.2) {
+Mat Generate_Mask_Gauss(int size_x, int size_y,double pr=0.5) {
 	random_device rd;
 	mt19937 gen(rd());
 	normal_distribution<> d(20, 1);
@@ -41,7 +47,7 @@ Mat Generate_Mask_Gauss(int size_x, int size_y,double pr=0.2) {
 	return result;
 }
 
-Mat Generate_Mask_Gamma(int size_x, int size_y,double pr=0.2) {
+Mat Generate_Mask_Gamma(int size_x, int size_y,double pr=0.5) {
 	random_device rd;
 	mt19937 gen(rd());
 	gamma_distribution<> d(10,1);
