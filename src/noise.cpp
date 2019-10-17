@@ -43,7 +43,12 @@ Mat Generate_Mask_Gauss(int size_x, int size_y,double pr=0.5) {
 	for (int i = 0; i < result.rows; i++) {
 		for (int j = 0; j < result.cols; j++) {
 			result.at<Vec3b>(i, j) = 0;
-		} 
+		}
+	}
+	for (int i = 0; i < size_x * size_y * pr; i++) {
+		int x = rand() % size_x;
+		int y = rand() % size_y;
+		result.at<Vec3b>(x, y)[0] = result.at < Vec3b>(x, y)[1] = result.at < Vec3b>(x, y)[2] = abs(d(gen));
 	}
 	return result;
 }
