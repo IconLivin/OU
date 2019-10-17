@@ -34,10 +34,7 @@ Mat createNoise(Mat image, Mat noise)
 
 
 
-Mat Generate_Mask_Gauss(int size_x, int size_y,double pr=0.5) {
-	random_device rd;
-	mt19937 gen(rd());
-	normal_distribution<> d(20, 1);
+Mat Generate_Mask_Gauss(int size_x, int size_y, double pr = 0.1) {
 	Mat result(size_x, size_y, CV_8UC3);
 	srand(time(NULL));
 	for (int i = 0; i < result.rows; i++) {
@@ -48,7 +45,29 @@ Mat Generate_Mask_Gauss(int size_x, int size_y,double pr=0.5) {
 	for (int i = 0; i < size_x * size_y * pr; i++) {
 		int x = rand() % size_x;
 		int y = rand() % size_y;
-		result.at<Vec3b>(x, y)[0] = result.at < Vec3b>(x, y)[1] = result.at < Vec3b>(x, y)[2] = abs(d(gen));
+		float U = (rand() % 100) / 100.0;
+		float E = -log(rand());
+		while (U > exp(-(E - 1) * (E - 1))) {
+			E = -log(rand());
+			U = (rand() % 100) / 100.0;
+		}
+		U = (rand() % 100) / 100.0;
+		if (U > 0.5)E = abs(E);
+		else E = -abs(E) + 19;
+		result.at<Vec3b>(x, y)[0] = result.at < Vec3b>(x, y)[1] = result.at < Vec3b>(x, y)[2] = E + 5;
+	}
+	return result;
+}
+
+Mat Worse_Img_Gauss(Mat img) {
+	Mat result = img.clone();
+	Mat mask = Generate_Mask_Gauss(result.rows, result.cols, 0.3);
+	imshow("Mask", mask);
+	waitKey();
+	for (int i = 0; i < result.rows; i++) {
+		for (int j = 0; j < result.cols; j++) {
+			result.at<Vec3b>(i, j) += mask.at<Vec3b>(i, j);
+		}
 	}
 	return result;
 }
