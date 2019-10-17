@@ -293,6 +293,7 @@ Mat median_filter(Mat img)
 			b.clear();
 			g.clear();
 			r.clear(); 
+			r.clear(); 
 		}
 }
 	namedWindow("cpy1", WINDOW_NORMAL);
