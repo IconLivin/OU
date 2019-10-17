@@ -33,14 +33,11 @@ Mat createNoise(Mat image, Mat noise)
 }
 
 
-<<<<<<< HEAD
-Mat Generate_Mask_Gauss(int size_x, int size_y,double pr=0.2) {
-=======
+
 Mat Generate_Mask_Gauss(int size_x, int size_y,double pr=0.5) {
 	random_device rd;
 	mt19937 gen(rd());
 	normal_distribution<> d(20, 1);
->>>>>>> 700f1b38e7c1162d21d383bd74b85091dbae1195
 	Mat result(size_x, size_y, CV_8UC3);
 	srand(time(NULL));
 	for (int i = 0; i < result.rows; i++) {
