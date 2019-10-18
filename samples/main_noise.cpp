@@ -14,10 +14,17 @@ int main(int argc, char** argv) {
 		cout << "Error load image" << endl;
 		return -1;
 	}
+<<<<<<< HEAD
 	Mat w_G_img = Worse_Img_Gauss(image);
 	imshow("Img", image);
 	imshow("Gauss", w_G_img);
 	imshow("f_img", Gauss_Filter(w_G_img));
+=======
+	Mat result = createNoise(image,Generate_Mask_Gamma(image.rows,image.cols));
+	imshow("Img", image);
+	imshow("Im1", result);
+	imshow("Im2", median_filter(result));
+>>>>>>> test1
 	waitKey();
 	//string labels_noise[2] = { "Gauss","Gamma" };
 	//string labels_blur[2] = { "Gauss", "Median" };
@@ -46,6 +53,7 @@ int main(int argc, char** argv) {
 	//		break;
 	//	}
 	//	}
+<<<<<<< HEAD
 	//	namedWindow("Image", WINDOW_NORMAL);
 	//	namedWindow("Noise", WINDOW_NORMAL);
 	//	namedWindow("Noise image", WINDOW_NORMAL);
@@ -65,9 +73,50 @@ int main(int argc, char** argv) {
 
 	//	waitKey(1);
 	//}
+=======
+
+	//			 namedWindow("test", WINDOW_NORMAL);
+	//			 namedWindow("test1", WINDOW_NORMAL);
+	//			// Mat m = normal_generator(50, 50, 0.3);
+	//			 imshow("test1", (createNoise(image, noise[1])));
+	//			 imshow("test", median_filter(createNoise(image, noise[1])));
+	//			 /*imshow("hist test", Build_Gist(m, 1));*/
+	//			 /*for (int i = 0; i < m.rows; i++) {
+	//				 for (int j = 0; j < m.cols; j++)
+	//				 {
+	//					 int num = (int)m.at<uchar>(i, j);
+	//					 if (num < 10)
+	//						 cout << right << setw(6) << num;
+	//					 else if (num < 100)
+	//						 cout << right << setw(5) << num;
+	//					 else
+	//						 cout << right << setw(4) << num;
+	//				 }
+	//				 cout << endl;
+	//			 }*/
+	//			 /*	namedWindow("Image", WINDOW_NORMAL);
+	//				 namedWindow("Noise", WINDOW_NORMAL);
+	//				 namedWindow("Noise image", WINDOW_NORMAL);
+	//				 namedWindow("Image after blur", WINDOW_NORMAL);
+	//				 namedWindow("Hist image", WINDOW_NORMAL);
+	//				 namedWindow("Hist noise", WINDOW_NORMAL);
+	//				 namedWindow("Hist noise image", WINDOW_NORMAL);
+	//				 namedWindow("Hist after blur", WINDOW_NORMAL);
+	//				 imshow("Image", image);
+	//				 imshow("Noise", noise[curr]);
+	//				 imshow("Noise image", createNoise(image, noise[curr]));
+	//				 imshow("Image after blur", CreateBlur(labels_blur[curr][0], createNoise(image, noise[curr])));
+	//				 imshow("Hist image", Build_Gist(image));
+	//				 imshow("Hist noise", Build_Gist(noise[curr], 1));
+	//				 imshow("Hist after blur", Build_Gist(CreateBlur(labels_blur[curr][0], createNoise(image, noise[curr]))));
+	//				 imshow("Hist noise image", Build_Gist(createNoise(image, noise[curr])));*/
+	//			 waitKey(1);
+	//	}
+>>>>>>> test1
 	//destroyAllWindows();
 	return 0;
 }
+
 
 
 

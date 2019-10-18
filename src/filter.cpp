@@ -46,7 +46,7 @@ int MaxDiff(Mat diff)
 	return max;
 }
 
-void WriteInfo(Mat image, ofstream& out, string path_file,string path_image, string name,int diff) //write matrix in file
+void WriteInfo(Mat image, ofstream& out, string path_file,string path_image=0, string name=0,int diff=0) //write matrix in file
 {
 	out << endl;
 	out.open(path_file, ios::app);
