@@ -5,7 +5,7 @@
 #include <string>
 #include <iomanip>
 #include <fstream>
-
+#include "noise.cpp"
 using namespace std;
 using namespace cv;
 
@@ -285,10 +285,12 @@ Mat CreateBlur(char f, Mat src,bool flag=0)
 	Mat dst(src.rows, src.cols,CV_8UC3);
 	if (flag)
 	{
-		switch (f) 
-		{
-		default:
+		switch (f) {
+		case 'G':
+			GaussianBlur(src, dst, Size(3, 3), 0);
 			break;
+		case 'M':
+			medianBlur(src,dst,3);
 		}
 	}
 	else 
@@ -296,10 +298,10 @@ Mat CreateBlur(char f, Mat src,bool flag=0)
 		switch (f) 
 		{
 		case 'G':
-			GaussianBlur(src, dst, Size(5, 5),0);
+			Gauss_Filter(src);
 			break;
 		case 'M':
-			medianBlur(src, dst,5);
+			median_filter(src);
 		}
 	}
 	return dst;
