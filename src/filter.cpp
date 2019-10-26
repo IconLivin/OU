@@ -5,7 +5,7 @@
 #include <string>
 #include <iomanip>
 #include <fstream>
-
+#include "noise.cpp"
 using namespace std;
 using namespace cv;
 
@@ -263,6 +263,7 @@ Mat Gauss_Filter(Mat img) {
 
 int median(vector <int> v) 
 {
+<<<<<<< HEAD
 	
 	sort(v.begin(), v.end(), greater<int>());
 	return v[v.size()/2];
@@ -281,6 +282,17 @@ Vec3b Get_Color_Median(Mat img, int size, int x, int y) {
 			r.push_back((int)img.at <Vec3b>(i, j)[2]);
 			y1++;
 		}
+	}
+	Mat dst(src.rows, src.cols,CV_8UC3);
+	if (flag)
+	{
+		switch (f) {
+		case 'G':
+			GaussianBlur(src, dst, Size(3, 3), 0);
+			break;
+		case 'M':
+			medianBlur(src,dst,3);
+		}
 		x1++;
 	}
 	color[0] = median(b);
@@ -297,6 +309,12 @@ Mat median_filter(Mat img)
 		for (int j = 0; j < result.cols - n; j++)
 		{
 			result.at<Vec3b>(i, j) = Get_Color_Median(result, n, i, j);
+
+		case 'G':
+			Gauss_Filter(src);
+			break;
+		case 'M':
+			median_filter(src);
 		}
 	}
 	return result;
