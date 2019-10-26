@@ -9,298 +9,298 @@
 using namespace std;
 using namespace cv;
 
-int Find_Max(int a, int b, int c) {
-	if (a > b) {
-		if (a > c)return a;
-		else return c;
-	}
-	else if (b > c)return b;
-	else return c;
+int Find_Max_Ch(int x, int y, int z) {
+	int n = x > y ? x : y;
+	n = n > z ? n : z;
+	return n;
 }
 
-int Find_Min(int a, int b, int c) {
-	if (a < b) {
-		if (a < c)return a;
-		else return c;
-	}
-	else if (b < c)return b;
-	else return c;
-}
+struct TNode {
+	Vec3b color;
+	int count;
+};
 
-void ClearFile(ofstream& out,string path_file)
-{
-	/*out.open("D:\\GithubProjects\\Computer Graphics\\OU\\info.txt");*/
-	out.open(path_file);
-	if (!out.is_open())
-		cout << "Error open file " << path_file << endl;
-	out.close();
-}
-
-int MaxDiff(Mat diff)
-{
-	int max = 0;
-	for (int i = 0; i < diff.rows; i++)
-		for (int j = 0; j < diff.cols; j++)
-			if (max < diff.at<uchar>(i, j))
-				max = diff.at<uchar>(i, j);
-	return max;
-}
-
-void WriteInfo(Mat image, ofstream& out, string path_file,string path_image=0, string name=0,int diff=0) //write matrix in file
-{
-	out << endl;
-	out.open(path_file, ios::app);
-	if (out.is_open())
-	{
-		out << "Image:" << path_image << endl;
-		out << "Filter:" << name << endl;
-		out << "Max:" << MaxDiff(image) << endl;
-		out << "Mistake:" << diff << endl;
-		if (image.rows <= 180 && image.cols < 180) {
-			for (int i = 0; i < image.rows; i++) {
-				for (int j = 0; j < image.cols; j++)
-				{
-					int num = (int)image.at<uchar>(i, j);
-					if (num < 10)
-						out << right << setw(6) << num;
-					else if (num < 100)
-						out << right << setw(5) << num;
-					else
-						out << right << setw(4) << num;
+class color_queue {
+public:
+	TNode mas[3];
+	color_queue(int x, int y, int z) {
+		mas[0].count = x;
+		mas[0].color = { 255, 0, 0 };
+		mas[1].count = y;
+		mas[1].color = { 0, 255, 0 };
+		mas[2].count = z;
+		mas[2].color = { 0, 0, 255 };
+		for (int i = 0; i < 3; i++) {
+			for (int j = 0; j < 2; j++) {
+				if (mas[j].count > mas[j + 1].count) {
+					TNode tmp = mas[j];
+					mas[j] = mas[j + 1];
+					mas[j + 1] = tmp;
 				}
-				out << endl;
+			}
+		}
+		for (int i = 2; i > 0; i--) {
+			mas[i].count -= mas[i - 1].count;
+		}
+
+	}
+};
+
+
+Mat Build_Gist(Mat img, bool flag = 0) {
+	int Gist_R[256];
+	int Gist_G[256];
+	int Gist_B[256];
+	for (int i = 0; i < 256; i++)
+	{
+		Gist_R[i] = 0;
+		Gist_G[i] = 0;
+		Gist_B[i] = 0;
+	}
+	int Max_value = 0;;
+	for (int i = 0; i < img.rows; i++) {
+		for (int j = 0; j < img.cols; j++) {
+			if (flag == 0) {
+				Gist_R[img.at<Vec3b>(i, j)[0]]++;
+				Gist_G[img.at<Vec3b>(i, j)[1]]++;
+				Gist_B[img.at<Vec3b>(i, j)[2]]++;
+			}
+			else if (img.at<Vec3b>(i, j)[0] != 0)
+			{
+				int c = img.at<Vec3b>(i, j)[0];
+				Gist_R[img.at<Vec3b>(i, j)[0]]++;
+				Gist_G[img.at<Vec3b>(i, j)[1]]++;
+				Gist_B[img.at<Vec3b>(i, j)[2]]++;
 			}
 		}
 	}
-	else
-		cout << "Error open file in function WriteInfo " << path_file << endl;
-	out << endl;
-	out.close();
-}
-
-Mat Difference(Mat greyCV, Mat fil) // Matrix difference
-{
-
-	Mat result(greyCV.rows, greyCV.cols, CV_8UC1); //create monochro
-	for (int i = 0; i < greyCV.rows; i++)
-		for (int j = 0; j < greyCV.cols; j++)
-			result.at<uchar>(i, j) = abs((int)greyCV.at<uchar>(i, j) - (int)fil.at<Vec3b>(i, j)[0]);
+	for (int i = 0; i < 256; i++) {
+		if (Gist_R[i] > Max_value)Max_value = Gist_R[i];
+		if (Gist_G[i] > Max_value)Max_value = Gist_G[i];
+		if (Gist_B[i] > Max_value)Max_value = Gist_B[i];
+	}
+	while (Max_value > 700) {
+		for (int i = 0; i < 256; i++) {
+			Gist_R[i] /= 2;
+			Gist_G[i] /= 2;
+			Gist_B[i] /= 2;
+		}
+		Max_value /= 2;
+	}
+	Mat result(Max_value + 20, 1290, CV_8UC3);
+	int counter = 0;
+	for (int i = 2; i < result.cols; i += 5) {
+		color_queue c(Gist_R[counter], Gist_G[counter], Gist_B[counter]);
+		int cc = 0;
+		for (int j = result.rows - 1; j > result.rows - Find_Max_Ch(Gist_R[counter], Gist_G[counter], Gist_B[counter]);) {
+			int k = 0;
+			while (k < c.mas[cc].count) {
+				for (int i1 = 0; i1 < 4; i1++) {
+					result.at<Vec3b>(j, i + i1) = c.mas[cc].color;
+				}
+				k++;
+				j--;
+			}
+			cc++;
+		}
+		if (++counter == 256)break;
+	}
 	return result;
 }
 
-class All_Fill {
-protected:
-	int cc;
-	Mat img1, img2, img3;
-public:
-	All_Fill() { cc = 0; }
-	void Count_CC(Mat orig) {
-		int res = 0;
-		for (int i = 0; i < orig.rows; i++) {
-			for (int j = 0; j < orig.cols; j++) {
-				res += abs((int)orig.at<uchar>(i, j) - (int)img1.at<Vec3b>(i, j)[0]);
-			}
+Mat hist_intensity(Mat img) {
+	int gist_intensity[256];
+	for (int i = 0; i < 256; i++)
+		gist_intensity[i] = 0;
+	int Max_value = 0;;
+	for (int i = 0; i < img.rows; i++) {
+		for (int j = 0; j < img.cols; j++) {
+			gist_intensity[img.at<uchar>(i, j)]++;
 		}
-		cc = abs(res / (orig.rows * orig.cols));
-	};
-	int Get_CC() { return cc; }
-
-	void Make_Problems(Mat orig) {
-		Mat result = img1.clone(); 
-		for (int i = 0; i < orig.rows; i++) {
-			for (int j = 0; j < orig.cols; j++) {
-				if (abs((int)orig.at<uchar>(i, j) - (int)img1.at<Vec3b>(i, j)[0]) > cc) {
-					result.at<Vec3b>(i, j)[2] = 255;
-					result.at<Vec3b>(i, j)[1] = 0;
-					result.at<Vec3b>(i, j)[0] = 0;
-				}
-			}
-		}
-		img2 = result.clone();
-	};
-	void Formula(Mat orig) 
-	{
-		Mat diff = Difference(orig, img1).clone();
-		Mat ni(diff.rows, diff.cols, CV_8UC3);
-		for (int i = 0; i < diff.rows; i++) {
-			for (int j = 0; j < diff.cols; j++) {
-				if ((int)diff.at<uchar>(i, j) < 8)
-					ni.at<Vec3b>(i, j) = Vec3b(128, 0, 0);
-				if ( (int)diff.at<uchar>(i,j)<20)
-					ni.at<Vec3b>(i, j) = Vec3b(0, 255, 0);
-				else if ((int)diff.at<uchar>(i, j) < 40)
-					ni.at<Vec3b>(i, j) = Vec3b(0, 128, 0);
-				else if ((int)diff.at<uchar>(i, j) < 60)
-					ni.at<Vec3b>(i, j) = Vec3b(0, 255, 255);
-				else if ((int)diff.at<uchar>(i, j) < 80)
-					ni.at<Vec3b>(i, j) = Vec3b(0, 165, 255);
-				else if ((int)diff.at<uchar>(i, j) < 100)
-					ni.at<Vec3b>(i, j) = Vec3b(0, 0, 255);
-				else if ((int)diff.at<uchar>(i, j) < 120)
-					ni.at<Vec3b>(i, j) = Vec3b(0, 0, 128);
-				else
-					ni.at<Vec3b>(i, j) = Vec3b(0, 0, 0);
-
-			}
-		}
-
-		/*imshow("New", ni);
-		waitKey(0);*/
-		img3 = ni.clone();
 	}
-	Mat Get_Mat1() { return img1; }
-	Mat Get_Mat2() { return img2; }
-	Mat Get_Mat3() { return img3; }
-};
-
-class Avg_Fill :public All_Fill {
-public:
-	Avg_Fill(Mat img) {
-		Mat result = img.clone();
-		for (int i = 0; i < result.rows; i++) {
-			for (int j = 0; j < result.cols; j++) {
-				int intense = (result.at<Vec3b>(i, j)[0] + result.at<Vec3b>(i, j)[1] + result.at<Vec3b>(i, j)[2]) / 3;
-				result.at<Vec3b>(i, j)[0] = intense;
-				result.at<Vec3b>(i, j)[1] = intense;
-				result.at<Vec3b>(i, j)[2] = intense;
-			}
+	for (int i = 0; i < 256; i++)
+		if (gist_intensity[i] > Max_value)Max_value = gist_intensity[i];
+	while (Max_value > 700) {
+		for (int i = 0; i < 256; i++) {
+			gist_intensity[i] /= 2;
 		}
-		img1 = result;
+		Max_value /= 2;
 	}
-};
-
-class Light_Fill :public All_Fill {
-public:
-	Light_Fill(Mat img) {
-		Mat result = img.clone();
-		for (int i = 0; i < result.rows; i++) {
-			for (int j = 0; j < result.cols; j++) {
-				int intense = (Find_Max(result.at<Vec3b>(i, j)[0], result.at <Vec3b>(i, j)[1], result.at <Vec3b>(i, j)[2]) + Find_Min(result.at<Vec3b>(i, j)[0], result.at <Vec3b>(i, j)[1], result.at <Vec3b>(i, j)[2])) / 2;
-				result.at<Vec3b>(i, j)[0] = intense;
-				result.at<Vec3b>(i, j)[1] = intense;
-				result.at<Vec3b>(i, j)[2] = intense;
-			}
-		}
-		img1 = result.clone();
-	}
-};
-
-class Lum_Fill :public All_Fill {
-public:
-	Lum_Fill(Mat img) {
-		Mat result = img.clone();
-		for (int i = 0; i < result.rows; i++) {
-			for (int j = 0; j < result.cols; j++) {
-				int intense = (result.at<Vec3b>(i, j)[0] * 0.21 + result.at<Vec3b>(i, j)[1] * 0.72 + result.at<Vec3b>(i, j)[2] * 0.07);
-				result.at<Vec3b>(i, j)[0] = intense;
-				result.at<Vec3b>(i, j)[1] = intense;
-				result.at<Vec3b>(i, j)[2] = intense;
-			}
-		}
-		img1 = result.clone();
-	}
-};
-
-class Ph_Fill :public All_Fill {
-public:
-	Ph_Fill(Mat img) {
-		Mat result = img.clone();
-		for (int i = 0; i < result.rows; i++) {
-			for (int j = 0; j < result.cols; j++) {
-				int intense = (result.at<Vec3b>(i, j)[0] * 0.3 + result.at<Vec3b>(i, j)[1] * 0.59 + result.at<Vec3b>(i, j)[2] * 0.11);
-				result.at<Vec3b>(i, j)[0] = intense;
-				result.at<Vec3b>(i, j)[1] = intense;
-				result.at<Vec3b>(i, j)[2] = intense;
-			}
-		}
-		img1 = result.clone();
-	}
-};
-
-class ITU_R_Fill :public All_Fill {
-public:
-	ITU_R_Fill(Mat img) {
-		Mat result = img.clone();
-		for (int i = 0; i < result.rows; i++) {
-			for (int j = 0; j < result.cols; j++) {
-				int intense = (result.at<Vec3b>(i, j)[0] * 0.2126 + result.at<Vec3b>(i, j)[1] * 0.7152 + result.at<Vec3b>(i, j)[2] * 0.0722);
-				result.at<Vec3b>(i, j)[0] = intense;
-				result.at<Vec3b>(i, j)[1] = intense;
-				result.at<Vec3b>(i, j)[2] = intense;
-			}
-		}
-		img1 = result.clone();
-	}
-};
-
-class Max_Fill :public All_Fill {
-public:
-	Max_Fill(Mat img) {
-		Mat result = img.clone();
-		for (int i = 0; i < result.rows; i++) {
-			for (int j = 0; j < result.cols; j++) {
-				int intense = (Find_Max(result.at<Vec3b>(i, j)[0], result.at<Vec3b>(i, j)[1], result.at<Vec3b>(i, j)[2]));
-				result.at<Vec3b>(i, j)[0] = intense;
-				result.at<Vec3b>(i, j)[1] = intense;
-				result.at<Vec3b>(i, j)[2] = intense;
-			}
-		}
-		img1 = result.clone();
-	}
-};
-
-class Min_Fill :public All_Fill {
-public:
-	Min_Fill(Mat img) {
-		Mat result = img.clone();
-		for (int i = 0; i < result.rows; i++) {
-			for (int j = 0; j < result.cols; j++) {
-				int intense = (Find_Min(result.at<Vec3b>(i, j)[0], result.at<Vec3b>(i, j)[1], result.at<Vec3b>(i, j)[2]));
-				result.at<Vec3b>(i, j)[0] = intense;
-				result.at<Vec3b>(i, j)[1] = intense;
-				result.at<Vec3b>(i, j)[2] = intense;
-			}
-		}
-		img1 = result.clone();
-	}
-};
-
-class NN_Fill :public All_Fill {
-public:
-	NN_Fill(Mat img) {
-		Mat result = img.clone();
-		for (int i = 0; i < result.rows; i++) {
-			for (int j = 0; j < result.cols; j++) {
-				int intense = (result.at<Vec3b>(i, j)[0] * 0.2952 + result.at<Vec3b>(i, j)[1] * 0.5547 + result.at<Vec3b>(i, j)[2] * 0.148);
-				result.at<Vec3b>(i, j)[0] = intense;
-				result.at<Vec3b>(i, j)[1] = intense;
-				result.at<Vec3b>(i, j)[2] = intense;
-			}
-		}
-		img1 = result.clone();
-	}
-};
-Mat CreateBlur(char f, Mat src,bool flag=0) 
-{
-	Mat dst(src.rows, src.cols,CV_8UC3);
-	if (flag)
-	{
-		switch (f) 
+	Point p(0, Max_value);
+	Mat result(Max_value, 1290, CV_8UC1);
+	cout << Max_value << endl << result.rows << endl;
+	for (int i = 0; i < 256; i++) {
+		if (gist_intensity[i] > 1)
 		{
-		default:
-			break;
+			line(result, p, Point(p.x, result.rows - gist_intensity[i]), Scalar(255, 255, 255), 2);
+			p.x += 5;
 		}
 	}
-	else 
-	{
-		switch (f) 
-		{
-		case 'G':
-			GaussianBlur(src, dst, Size(5, 5),0);
-			break;
-		case 'M':
-			medianBlur(src, dst,5);
-		}
-	}
-	return dst;
+	return result;
 }
+
+const float PI = 3.14159265358979323846;
+
+int Clamp(int x) {
+	int n = x > 0 ? x : 0;
+	n = x < 256 ? x : 255;
+	return n;
+}
+
+int Clamp(int x, int y, int z) {
+	int n = x < y ? y : x;
+	n = n > z ? z : n;
+	return n;
+}
+Mat createNoise(Mat image, Mat noise) 
+{
+	return image + noise;
+}
+
+Mat Generate_Mask_Gauss(int size_x, int size_y, double pr = 0.1) {
+	Mat result(size_x, size_y, CV_8UC3);
+	srand(time(NULL));
+	for (int i = 0; i < result.rows; i++) {
+		for (int j = 0; j < result.cols; j++) {
+			result.at<Vec3b>(i, j) = 0;
+		}
+	}
+	for (int i = 0; i < size_x * size_y * pr; i++) {
+		int x = rand() % size_x;
+		int y = rand() % size_y;
+		float U = (rand() % 100) / 100.0;
+		float E = -log(rand());
+		while (U > exp(-(E - 1) * (E - 1))) {
+			E = -log(rand());
+			U = (rand() % 100) / 100.0;
+		}
+		U = (rand() % 100) / 100.0;
+		if (U > 0.5)E = abs(E);
+		else E = -abs(E) + 19;
+		result.at<Vec3b>(x, y)[0] = result.at < Vec3b>(x, y)[1] = result.at < Vec3b>(x, y)[2] = E + 5;
+	}
+	return result;
+}
+
+Mat Worse_Img_Gauss(Mat img) {
+	Mat result = img.clone();
+	Mat mask = Generate_Mask_Gauss(result.rows, result.cols, 0.3);
+	imshow("Mask", mask);
+	waitKey();
+	for (int i = 0; i < result.rows; i++) {
+		for (int j = 0; j < result.cols; j++) {
+			result.at<Vec3b>(i, j) += mask.at<Vec3b>(i, j);
+		}
+	}
+	return result;
+}
+
+Mat Generate_Mask_Gamma(int size_x, int size_y,double pr=0.3) {
+	random_device rd;
+	mt19937 gen(rd());
+	gamma_distribution<> d(9, 0.5);
+	Mat result(size_x, size_y, CV_8UC3);
+	srand(time(NULL));
+	for (int i = 0; i < result.rows; i++) {
+		for (int j = 0; j < result.cols; j++) {
+			result.at<Vec3b>(i, j) = 0;
+		}
+	}
+	for (int i = 0; i < size_x * size_y * pr; i++) {
+		int x = rand() % size_x;
+		int y = rand() % size_y;
+		result.at<Vec3b>(x, y)[0] = result.at < Vec3b>(x, y)[1] = result.at < Vec3b>(x, y)[2] = abs(d(gen));
+	}
+	return result;
+}
+
+float** Gauss_Kernel(int radius, float sigma) {
+	int size = 2 * radius + 1;
+	float** kernel = new float* [size];
+	for (int i = 0; i < size; i++) {
+		kernel[i] = new float[size];
+	}
+	float norm = 0;
+	for (int i = 0; i < size; i++)
+		for (int j = 0; j < size; j++)
+		{
+			kernel[i][j] = (float)(exp(-(i * i + j * j) / (sigma * sigma)));
+			norm += kernel[i][j];
+		}
+	for (int i = 0; i < size; i++)
+		for (int j = 0; j < size; j++)
+			kernel[i][j] /= norm;
+	return kernel;
+}
+
+Vec3b Get_Color_Gauss(float** kernel, Mat img, int size, int x, int y) {
+	Vec3b color = 0;
+	int x1 = 0, y1 = 0;
+	for (int i = x; i < size + x; i++) {
+		y1 = 0;
+		for (int j = y; j < size + y; j++) {
+			color[0] += img.at<Vec3b>(i, j)[0] * kernel[x1][y1];
+			color[1] += img.at<Vec3b>(i, j)[1] * kernel[x1][y1];
+			color[2] += img.at<Vec3b>(i, j)[2] * kernel[x1][y1];
+			y1++;
+		}
+		x1++;
+	}
+	return color;
+}
+
+Mat Gauss_Filter(Mat img) {
+	int n = 3;
+	Mat result = img.clone();
+	float** kernel = Gauss_Kernel(n, 2);
+	for (int i = 2 * n + 1; i < img.rows - (2 * n + 1); i++) {
+		for (int j = 2 * n + 1; j < img.cols - (2 * n + 1); j++) {
+			result.at<Vec3b>(i, j) = Get_Color_Gauss(kernel, img, 2 * n + 1, i, j);
+		}
+	}
+	return result;
+}
+
+int median(vector <int> v) 
+{
+	
+	sort(v.begin(), v.end(), greater<int>());
+	return v[v.size()/2];
+
+}
+
+Vec3b Get_Color_Median(Mat img, int size, int x, int y) {
+	Vec3b color = 0;
+	int x1 = 0, y1 = 0;
+	vector <int > b, g, r;
+	for (int i = x; i < size + x; i++) {
+		y1 = 0;
+		for (int j = y; j < size + y; j++) {
+			b.push_back((int)img.at <Vec3b>(i, j)[0]);
+			g.push_back((int)img.at <Vec3b>(i, j)[1]);
+			r.push_back((int)img.at <Vec3b>(i, j)[2]);
+			y1++;
+		}
+		x1++;
+	}
+	color[0] = median(b);
+	color[1] = median(g);
+	color[2] = median(r);
+	return color;
+}
+
+Mat median_filter(Mat img)
+{
+	const int n = 3;
+	Mat result=img.clone();
+	for (int i = 0; i < result.rows - n; i++) {
+		for (int j = 0; j < result.cols - n; j++)
+		{
+			result.at<Vec3b>(i, j) = Get_Color_Median(result, n, i, j);
+		}
+	}
+	return result;
+}
+
+
+
