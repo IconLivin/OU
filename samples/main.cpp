@@ -12,7 +12,7 @@ void main(int argc,char** argv) {
 	CommandLineParser parser(argc, argv, cmdOptions);
 	//string path_to_image(parser.get<String>("C:\\Users\\aaron\\OneDrive\\Рабочий стол\\OU-build\\samples\\lobachevsky.jpg"));
 	
-	Mat image = imread("../../OU/picture/audi.jpg");
+	Mat image = imread("../../OU/picture/lob.jpg");
 	int porog;
 	namedWindow("Win1", WINDOW_NORMAL);
 	namedWindow("adgadg", WINDOW_NORMAL);
@@ -21,7 +21,7 @@ void main(int argc,char** argv) {
 	imshow("Win1", image);
 	imshow("adgadg", por);
 	imshow("Porog", hist_intensity(image, porog));
-
+	FindCountours(por);
 	cout << "Regions:" << Find_Regions(por) << endl;
 	waitKey();
 }

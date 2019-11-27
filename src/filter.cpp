@@ -119,7 +119,6 @@ Mat hist_intensity(Mat img, int porog) {
 	}
 	Point p(0, Max_value);
 	Mat result(Max_value, 1290, CV_8UC3);
-	cout << Max_value << endl << result.rows << endl;
 	for (int i = 0; i < 256; i++) {
 		if (gist_intensity[i] > 1)
 		{
@@ -186,4 +185,30 @@ int Find_Regions(Mat img) {
 		}
 	}
 	return count;
+}
+
+void FindCountours(Mat img) {
+	RNG rng(12345);
+	Mat clone = img.clone();
+	vector<vector<Point>> contours;
+	findContours(clone, contours, RETR_TREE, CHAIN_APPROX_SIMPLE);
+	vector<Moments> mu(contours.size());
+	for (size_t i = 0; i < contours.size(); i++)
+	{
+		mu[i] = moments(contours[i], true);
+	}
+	Mat drawing = Mat::zeros(clone.size(), CV_8UC3);
+	for (size_t i = 0; i < contours.size(); i++)
+	{
+		Scalar color = Scalar(rng.uniform(0, 256), rng.uniform(0, 256), rng.uniform(0, 256));
+		drawContours(drawing, contours, (int)i, color, 2);
+	}
+	namedWindow("Contours", WINDOW_NORMAL);
+	imshow("Contours", drawing);
+	cout << "\t Info: Area and Contour Length \n";
+	for (size_t i = 0; i < contours.size(); i++)
+	{
+		cout << " * Contour[" << i << "] - Area (M_00) = " << std::fixed << std::setprecision(2) << mu[i].m00
+			<< " - Area OpenCV: " << contourArea(contours[i]) << " - Length: " << arcLength(contours[i], true) << endl;
+	}
 }
