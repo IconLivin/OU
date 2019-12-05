@@ -174,7 +174,7 @@ void Second_Iter(Mat& img, int x, int y, Moments& m, double x_lined, double y_li
 	img.at<uchar>(x, y) = 0;
 	Second_Iter(img, x + 1, y, m, x_lined, y_lined);
 	Second_Iter(img, x - 1, y, m, x_lined, y_lined);
-	Second_Iter(img, x, y+1, m, x_lined, y_lined);
+	Second_Iter(img, x, y + 1, m, x_lined, y_lined);
 	Second_Iter(img, x, y - 1, m, x_lined, y_lined);
 }
 
