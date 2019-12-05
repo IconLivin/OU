@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <fstream>
 #include <conio.h>
+#include <vector>
 
 using namespace std;
 using namespace cv;
@@ -150,8 +151,7 @@ Mat Make_Otsu(Mat source,int &tmp) {
 	return gray_s;
 }
 
-Mat Make_Otsu_Main(Mat source) {
-	int porog;
+Mat Make_Otsu_Main(Mat source,int &porog) {
 	Mat gray_s = Make_Otsu(source,porog);
 	for (int i = 0; i < source.rows; i++) {
 		for (int j = 0; j < source.cols; j++) {
@@ -161,54 +161,81 @@ Mat Make_Otsu_Main(Mat source) {
 	return source;
 }
 
-int Fill_Img(Mat& img, int x, int y) {
-	if (x < 0 || y < 0 || x >= img.rows || y >= img.cols)return 0;
-	if (img.at<uchar>(x, y) != 255)return 0;
-	/*imshow("asgasg", img);
-	waitKey(1);*/
+void Second_Iter(Mat& img, int x, int y, Moments& m, double x_lined, double y_lined) {
+	if (x < 0 || y < 0 || x >= img.rows || y >= img.cols)return;
+	if (img.at<uchar>(x, y) != 254)return;
+	m.mu02 += pow((x - x_lined), 2);
+	m.mu03 += pow((x - x_lined), 3);
+	m.mu11 += (x - x_lined) * (y - y_lined);
+	m.mu12 += (x - x_lined) * (y - y_lined) * (x - x_lined);
+	m.mu20 += (y - y_lined) * (y - y_lined);
+	m.mu21 += (x - x_lined) * (y - y_lined) * (y - y_lined);
+	m.mu30 += pow((y - y_lined), 3);
 	img.at<uchar>(x, y) = 0;
-	Fill_Img(img, x + 1, y);
-	Fill_Img(img, x - 1, y);
-	Fill_Img(img, x, y + 1);
-	Fill_Img(img, x, y - 1);
+	Second_Iter(img, x + 1, y, m, x_lined, y_lined);
+	Second_Iter(img, x - 1, y, m, x_lined, y_lined);
+	Second_Iter(img, x, y+1, m, x_lined, y_lined);
+	Second_Iter(img, x, y - 1, m, x_lined, y_lined);
 }
 
-int Find_Regions(Mat img) {
+void Fill_Img(Mat& img, int x, int y, Moments& m) {
+	if (x < 0 || y < 0 || x >= img.rows || y >= img.cols)return;
+	if (img.at<uchar>(x, y) != 255)return;
+	m.m00++;
+	m.m10 += y;
+	m.m01 += x;
+	img.at<uchar>(x, y) = 254;
+	Fill_Img(img, x + 1, y, m);
+	Fill_Img(img, x - 1, y, m);
+	Fill_Img(img, x, y + 1, m);
+	Fill_Img(img, x, y - 1, m);
+}
+
+int Find_Regions(Mat img, vector<Moments>& mom, vector<vector<double>>& hum) {
 	Mat clone = img.clone();
 	int count = 0;
+	vector<Moments> moments;
 	for (int i = 0; i < clone.rows; ++i) {
 		for (int j = 0; j < clone.cols; ++j) {
 			if (clone.at<uchar>(i, j) == 255) {
+				Moments curr;
 				count++;
-				Fill_Img(clone, i, j);
+				Fill_Img(clone, i, j, curr);
+				
+				double y_lined = curr.m10 / curr.m00;
+				double x_lined = curr.m01 / curr.m00;
+				Second_Iter(img, i, j, curr, x_lined, y_lined);
+				curr.nu02 = curr.mu02 / pow(curr.m00, 2);
+				curr.nu03 = curr.mu03 / pow(curr.m00, 2.5);
+				curr.nu11 = curr.mu11 / pow(curr.m00, 2);
+				curr.nu12 = curr.mu12 / pow(curr.m00, 2.5);
+				curr.nu20 = curr.mu20 / pow(curr.m00, 2);
+				curr.nu21 = curr.mu21 / pow(curr.m00, 2.5);
+				curr.nu30 = curr.mu30 / pow(curr.m00, 2.5);
+				moments.push_back(curr);
 			}
 		}
 	}
+	vector<vector<double>> hu;
+	for (int i = 0; i < moments.size(); ++i) {
+		double humoments[7];
+		humoments[0] = moments[i].nu20 + moments[i].nu02;
+		humoments[1] = pow(moments[i].nu20 - moments[i].nu02, 2) + 4 * pow(moments[i].nu11, 2);
+		humoments[2] = pow(moments[i].nu30 - 3 * moments[i].nu12, 2) + (3 * moments[i].nu21 - moments[i].nu03, 2);
+		humoments[3] = pow(moments[i].nu30 + moments[i].nu12, 2) + pow(moments[i].nu21 + moments[i].nu03, 2);
+		humoments[4] = (moments[i].nu30 - 3 * moments[i].nu12) * (moments[i].nu30 + moments[i].nu12) * (pow(moments[i].nu30 + moments[i].nu12, 2) - 3 * pow(moments[i].nu21 + moments[i].nu03, 2)) + (3 * moments[i].nu21 - moments[i].nu03) * (moments[i].nu21 + moments[i].nu03) * (3 * pow(moments[i].nu30 + moments[i].nu12, 2) - pow(moments[i].nu21 + moments[i].nu03, 2));		
+		humoments[5] = (moments[i].nu20 - moments[i].nu02) * (pow(moments[i].nu30 + moments[i].nu12, 2) - pow(moments[i].nu21 - moments[i].nu03, 2)) + 4 * moments[i].nu11 * (moments[i].nu30 + moments[i].nu12) * (moments[i].nu21 + moments[i].nu03);
+		humoments[6] = (3 * moments[i].nu21 - moments[i].nu03) * (moments[i].nu21 + moments[i].nu03) * (3 * pow(moments[i].nu30 + moments[i].nu12, 2) - pow(moments[i].nu21 + moments[i].nu03, 2)) - (moments[i].nu30 - 3 * moments[i].nu12) * (moments[i].nu21 + moments[i].nu03) * (3 * pow(moments[i].nu30 + moments[i].nu12, 2) - pow(moments[i].nu21 + moments[i].nu03, 2));
+		vector<double> h;
+		for (int j = 0; j < 7; ++j) {
+			cout << humoments[j] << " ";
+			h.push_back(humoments[j]);
+		}
+		cout << endl;
+		hu.push_back(h);
+	}
+	mom = moments;
+	hum = hu;
 	return count;
 }
 
-void FindCountours(Mat img) {
-	RNG rng(12345);
-	Mat clone = img.clone();
-	vector<vector<Point>> contours;
-	findContours(clone, contours, RETR_TREE, CHAIN_APPROX_SIMPLE);
-	vector<Moments> mu(contours.size());
-	for (size_t i = 0; i < contours.size(); i++)
-	{
-		mu[i] = moments(contours[i], true);
-	}
-	Mat drawing = Mat::zeros(clone.size(), CV_8UC3);
-	for (size_t i = 0; i < contours.size(); i++)
-	{
-		Scalar color = Scalar(rng.uniform(0, 256), rng.uniform(0, 256), rng.uniform(0, 256));
-		drawContours(drawing, contours, (int)i, color, 2);
-	}
-	namedWindow("Contours", WINDOW_NORMAL);
-	imshow("Contours", drawing);
-	cout << "\t Info: Area and Contour Length \n";
-	for (size_t i = 0; i < contours.size(); i++)
-	{
-		cout << " * Contour[" << i << "] - Area (M_00) = " << std::fixed << std::setprecision(2) << mu[i].m00
-			<< " - Area OpenCV: " << contourArea(contours[i]) << " - Length: " << arcLength(contours[i], true) << endl;
-	}
-}
