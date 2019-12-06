@@ -12,7 +12,7 @@ void main(int argc,char** argv) {
 	CommandLineParser parser(argc, argv, cmdOptions);
 	//string path_to_image(parser.get<String>("C:\\Users\\aaron\\OneDrive\\Рабочий стол\\OU-build\\samples\\lobachevsky.jpg"));
 	
-	Mat image = imread("../../OU/picture/5.jpg");
+	Mat image = imread("../../OU/picture/2.jpg");
 	int porog;
 	namedWindow("Win1", WINDOW_NORMAL);
 	namedWindow("adgadg", WINDOW_NORMAL);

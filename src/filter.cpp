@@ -161,9 +161,11 @@ Mat Make_Otsu_Main(Mat source,int &porog) {
 	return source;
 }
 
-void Second_Iter(Mat& img, int x, int y, Moments& m, double x_lined, double y_lined) {
-	if (x < 0 || y < 0 || x >= img.rows || y >= img.cols)return;
-	if (img.at<uchar>(x, y) != 254)return;
+int Second_Iter(Mat& img, int x, int y, Moments& m, double x_lined, double y_lined) {
+	if (x < 0 || y < 0 || x >= img.rows || y >= img.cols)return 0;
+	if (img.at<uchar>(x, y) != 254) {
+		return 0;
+	}
 	m.mu02 += pow((x - x_lined), 2);
 	m.mu03 += pow((x - x_lined), 3);
 	m.mu11 += (x - x_lined) * (y - y_lined);
@@ -178,9 +180,9 @@ void Second_Iter(Mat& img, int x, int y, Moments& m, double x_lined, double y_li
 	Second_Iter(img, x, y - 1, m, x_lined, y_lined);
 }
 
-void Fill_Img(Mat& img, int x, int y, Moments& m) {
-	if (x < 0 || y < 0 || x >= img.rows || y >= img.cols)return;
-	if (img.at<uchar>(x, y) != 255)return;
+int Fill_Img(Mat& img, int x, int y, Moments& m) {
+	if (x < 0 || y < 0 || x >= img.rows || y >= img.cols)return 0;
+	if (img.at<uchar>(x, y) != 255)return 0;
 	m.m00++;
 	m.m10 += y;
 	m.m01 += x;
@@ -204,7 +206,7 @@ int Find_Regions(Mat img, vector<Moments>& mom, vector<vector<double>>& hum) {
 				
 				double y_lined = curr.m10 / curr.m00;
 				double x_lined = curr.m01 / curr.m00;
-				Second_Iter(img, i, j, curr, x_lined, y_lined);
+				Second_Iter(clone, i, j, curr, x_lined, y_lined);
 				curr.nu02 = curr.mu02 / pow(curr.m00, 2);
 				curr.nu03 = curr.mu03 / pow(curr.m00, 2.5);
 				curr.nu11 = curr.mu11 / pow(curr.m00, 2);
